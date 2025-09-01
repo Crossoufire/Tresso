@@ -32,9 +32,7 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
     const [acceptColumnDrop, setAcceptColumnDrop] = useState<"none" | "left" | "right">("none");
 
     const cardRef = useCallback((node: HTMLElement | null) => {
-        node?.scrollIntoView({
-            block: "nearest",
-        });
+        node?.scrollIntoView({ block: "nearest" });
     }, []);
 
     const sortedCards = useMemo(() => {
@@ -177,7 +175,7 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
                     </DropdownMenu>
                 </div>
 
-                <ul ref={listRef} className="flex-grow overflow-auto p-1">
+                <ul ref={listRef} className="flex-grow overflow-auto p-1 mr-1.5">
                     {sortedCards.map((card, idx, cards) =>
                         <Card
                             card={card}

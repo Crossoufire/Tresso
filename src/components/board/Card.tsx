@@ -60,11 +60,13 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
         ev.stopPropagation();
     };
 
-    const openEditDialog = () => {
+    const openEditDialog = (ev: any) => {
+        ev.stopPropagation();
         setIsEditDialogOpen(true);
     };
 
-    const onDeleteHandler = () => {
+    const onDeleteHandler = (ev: any) => {
+        ev.stopPropagation();
         if (!window.confirm("Are you sure to delete this card?")) return;
 
         deleteCardMutation.mutate({ data: { id: card.id } }, {

@@ -73,11 +73,11 @@ export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardPro
                 </div>
                 <div>
                     <div className="flex justify-end items-center gap-2">
+                        <Button variant="outline" onClick={onComplete} disabled={createCardMutation.isPending}>
+                            Cancel
+                        </Button>
                         <Button ref={buttonRef} variant="default" disabled={createCardMutation.isPending} type="submit">
                             {createCardMutation.isPending && <Loader2 className="animate-spin"/>} Add
-                        </Button>
-                        <Button variant="destructive" onClick={onComplete} disabled={createCardMutation.isPending}>
-                            Cancel
                         </Button>
                     </div>
                 </div>

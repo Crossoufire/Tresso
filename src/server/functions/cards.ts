@@ -3,9 +3,9 @@ import {and, eq, max} from "drizzle-orm";
 import {notFound} from "@tanstack/router-core";
 import * as s from "~/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
+import {FormattedError} from "~/server/utils/error-classes";
 import {authMiddleware} from "~/server/middlewares/authentication";
 import {createCardSchema, deleteCardSchema, labelToCardSchema, updateCardContentSchema, updateCardSchema, updateCardTitleSchema} from "~/server/utils/zod";
-import {FormattedError} from "~/server/utils/error-classes";
 
 
 export const createCard = createServerFn({ method: "POST" })
@@ -100,7 +100,8 @@ export const updateCardTitle = createServerFn({ method: "POST" })
 
         await db
             .update(s.cards)
-            .set({ title: data.title });
+            .set({ title: data.title })
+            .where(eq(s.cards.id, data.id));
     });
 
 
@@ -119,7 +120,8 @@ export const updateCardContent = createServerFn({ method: "POST" })
 
         await db
             .update(s.cards)
-            .set({ title: data.content });
+            .set({ title: data.content })
+            .where(eq(s.cards.id, data.id));
     });
 
 
@@ -170,5 +172,5 @@ export const removeLabelFromCard = createServerFn({ method: "POST" })
 
         await db
             .delete(s.cardsToLabels)
-            .values({ cardId: card.id, labelId: labelId });
+            .where(and(eq(s.cardsToLabels.cardId, cardId), eq(s.cardsToLabels.labelId, labelId)))
     });

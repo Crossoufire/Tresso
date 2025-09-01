@@ -6,7 +6,7 @@ import {CardLabel, CardType} from "~/types/types";
 import {Checkbox} from "~/components/ui/checkbox";
 import {ScrollArea} from "~/components/ui/scroll-area";
 import {boardDetailsOptions} from "~/react-query/query-options";
-import {useAddLabelToCardMutation} from "~/react-query/mutations";
+import {useAddLabelToCardMutation, useRemoveLabelFromCardMutation} from "~/react-query/mutations";
 
 
 interface LabelSelectionViewProps {
@@ -19,15 +19,21 @@ interface LabelSelectionViewProps {
 
 
 export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete, isPending }: LabelSelectionViewProps) {
+    const addLabelToCardMutation = useAddLabelToCardMutation(card.boardId);
+    const removeLabelFromCardMutation = useRemoveLabelFromCardMutation(card.boardId);
     const { data: boardLabels } = useQuery({
         ...boardDetailsOptions(card.boardId),
         refetchOnMount: false,
         select: (data) => data.labels,
     });
-    const addLabelToCardMutation = useAddLabelToCardMutation(card.boardId);
 
-    const addLabelToCardHandler = (label: CardLabel) => {
-        addLabelToCardMutation.mutate({ data: { cardId: card.id, labelId: label.id } });
+    const toggleLabelCardHandler = (checked: string | boolean, label: CardLabel) => {
+        if (checked) {
+            addLabelToCardMutation.mutate({ data: { cardId: card.id, labelId: label.id } });
+        }
+        else {
+            removeLabelFromCardMutation.mutate({ data: { cardId: card.id, labelId: label.id } });
+        }
     };
 
     return (
@@ -45,7 +51,7 @@ export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete,
                             <div key={label.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
                                 <div className="flex items-center gap-2 flex-1">
                                     <Checkbox
-                                        onCheckedChange={() => addLabelToCardHandler(label)}
+                                        onCheckedChange={(value) => toggleLabelCardHandler(value, label)}
                                         checked={card.labels.some((l) => l.id === label.id)}
                                     />
                                     <div className="w-3 h-3 rounded" style={{ backgroundColor: label.color }}/>

@@ -78,8 +78,6 @@ function BoardsPage() {
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
-
-                                {/*// TODO: Change maybe replace with createdAt, and lastUpdated ? potentially the number of columns and cards */}
                                 <div className="flex items-center justify-between mt-4">
                                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                         <div className="flex items-center gap-1">
@@ -105,15 +103,18 @@ function BoardsPage() {
                     <CardHeader className="h-full flex items-center">
                         <div className="text-center">
                             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-2 group-hover:bg-primary/10 duration-200">
-                                <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary duration-200"/>
+                                <Plus className="h-6 w-6 text-neutral-300 group-hover:text-primary duration-200"/>
                             </div>
-                            <p className="text-md font-medium text-muted-foreground group-hover:text-primary duration-200">
+                            <p className="text-md font-medium text-neutral-300 group-hover:text-primary duration-200">
                                 Create A New Board
                             </p>
                         </div>
                     </CardHeader>
                 </Card>
             </div>
+            <div className="-z-1 absolute top-2/5 left-35 w-28 h-28 bg-blue-500/20 rounded-full blur-xl"></div>
+            <div className="-z-1 absolute top-40 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>
+            <div className="-z-1 absolute bottom-20 left-2/3 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
         </div>
     );
 }

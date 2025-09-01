@@ -1,3 +1,4 @@
+import {toast} from "sonner";
 import {Loader2, Plus} from "lucide-react";
 import {Input} from "~/components/ui/input";
 import {Button} from "~/components/ui/button";
@@ -21,53 +22,55 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded }: NewColum
     const onSubmitHandler = (ev: React.FormEvent<HTMLFormElement>) => {
         ev.preventDefault();
         if (!inputRef.current) return;
-        createColMutation.mutate({ data: { boardId, name: inputRef.current.value } });
+        createColMutation.mutate({ data: { boardId, name: inputRef.current.value } }, {
+            onSuccess: () => toast.success("New Column Created!"),
+        });
         inputRef.current.value = "";
         onNewColumnAdded();
     };
 
     const onBlurHandler = (ev: React.FocusEvent<HTMLFormElement>) => {
         if (!ev.currentTarget.contains(ev.relatedTarget)) {
-            setEditing(false);
+            // setEditing(false);
         }
     };
 
-    if (editing) {
-        return (
-            <form onBlur={onBlurHandler} onSubmit={onSubmitHandler}>
-                <Card className="min-w-72 ml-3">
-                    <CardHeader>
-                        <CardTitle>Add Column</CardTitle>
-                        <CardDescription>Add a new column to this board</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Input
-                            type="text"
-                            ref={inputRef}
-                            required={true}
-                            autoFocus={true}
-                            name="columnName"
-                            autoComplete="off"
-                            placeholder="Enter a name..."
-                            disabled={createColMutation.isPending}
-                        />
-                    </CardContent>
-                    <CardFooter className="flex justify-end items-center gap-3">
-                        <Button variant="default" disabled={createColMutation.isPending}>
-                            {createColMutation.isPending && <Loader2 className="animate-spin"/>} Add
-                        </Button>
-                        <Button variant="destructive" onClick={() => setEditing(false)} disabled={createColMutation.isPending}>
-                            Cancel
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </form>
-        )
-    }
-
     return (
-        <Button onClick={() => setEditing(true)} size="sm" className="ml-2">
-            <Plus/>
-        </Button>
-    )
+        <>
+            {editing ?
+                <form onBlur={onBlurHandler} onSubmit={onSubmitHandler}>
+                    <Card className="min-w-72 ml-3">
+                        <CardHeader>
+                            <CardTitle>Add Column</CardTitle>
+                            <CardDescription>Add a new column to this board</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Input
+                                type="text"
+                                ref={inputRef}
+                                required={true}
+                                autoFocus={true}
+                                name="columnName"
+                                autoComplete="off"
+                                placeholder="Enter a name..."
+                                disabled={createColMutation.isPending}
+                            />
+                        </CardContent>
+                        <CardFooter className="flex justify-end items-center gap-3">
+                            <Button variant="destructive" onClick={() => setEditing(false)} disabled={createColMutation.isPending}>
+                                Cancel
+                            </Button>
+                            <Button variant="default" disabled={createColMutation.isPending}>
+                                {createColMutation.isPending ? <Loader2 className="animate-spin"/> : "Add"}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </form>
+                :
+                <Button onClick={() => setEditing(true)} size="sm" className="ml-2">
+                    <Plus/>
+                </Button>
+            }
+        </>
+    );
 }
