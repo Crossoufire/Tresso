@@ -1,9 +1,9 @@
 import {toast} from "sonner";
-import {CheckSquare, LogIn, StretchVertical, Zap} from "lucide-react";
 import authClient from "~/utils/auth-client";
 import {Button} from "~/components/ui/button";
 import {queryKeys} from "~/react-query/query-options";
 import {createFileRoute, redirect} from "@tanstack/react-router";
+import {CheckSquare, LogIn, StretchVertical, Zap} from "lucide-react";
 
 
 export const Route = createFileRoute("/")({

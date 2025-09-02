@@ -1,6 +1,6 @@
 import z from "zod/v4";
 import {createMiddleware} from "@tanstack/react-start";
-import {FormattedError, FormZodError} from "~/server/utils/error-classes";
+import {FormattedError} from "~/server/utils/error-classes";
 
 
 function createCleanError(originalError: Error, message?: string): Error {
@@ -17,8 +17,6 @@ function createCleanError(originalError: Error, message?: string): Error {
  * redirect: thrown in code but returned and handled frontend side by tanstack router.
  * notFound: thrown in code but returned and handled frontend side by tanstack router.
  * FormattedError: Expected Error with pre-formatted message for frontend side.
- * FormattedError(sendMail: true): Error not supposed to happened but pre-formatted message + send mail.
- * FormZodError: Error occurred during Form submission, return the whole error.
  * ZodError: Unexpected Error on validation, send admin email, return generic error message.
  * Error: Unexpected Error anywhere, send admin email, return generic error message.
  **/
@@ -33,9 +31,6 @@ export const errorMiddleware = createMiddleware({ type: "function" }).server(asy
         }
         if (err instanceof FormattedError) {
             throw createCleanError(err);
-        }
-        else if (err instanceof FormZodError) {
-            throw err;
         }
         else if (err instanceof z.ZodError) {
             throw createCleanError(err, "A Validation error occurred. Please try again later.");
