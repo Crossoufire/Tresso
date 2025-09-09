@@ -5,7 +5,7 @@ import {getWebRequest} from "@tanstack/react-start/server";
 
 export const getCurrentUser = createServerFn({ method: "GET" }).handler(async () => {
     const { headers } = getWebRequest();
-    const session = await auth.api.getSession({ headers });
+    const session = await auth.api.getSession({ headers, query: { disableCookieCache: true } });
 
     if (!session?.user) {
         return null;
