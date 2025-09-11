@@ -7,7 +7,7 @@ export const CONTENT_TYPES = {
 };
 
 
-export type BoardsType = Awaited<ReturnType<NonNullable<ReturnType<typeof boardsListOptions>["queryFn"]>>>
+export type BoardsType = Awaited<ReturnType<NonNullable<typeof boardsListOptions["queryFn"]>>>
 export type BoardType = Awaited<ReturnType<NonNullable<ReturnType<typeof boardDetailsOptions>["queryFn"]>>>;
 export type ColumnWithCards = BoardType["columns"][0] & { cards: BoardType["cards"] };
 export type CardType = BoardType["cards"][0];

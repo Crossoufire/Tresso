@@ -1,24 +1,24 @@
 import {useMutation, useQueryClient,} from "@tanstack/react-query";
-import {boardDetailsOptions, queryKeys} from "~/react-query/query-options";
 import {createBoard, deleteBoard, updateBoard} from "~/server/functions/boards";
 import {createLabel, deleteLabel, updateLabel} from "~/server/functions/labels";
+import {boardDetailsOptions, boardsListOptions} from "~/react-query/query-options";
 import {createColumn, deleteColumn, updateColumn} from "~/server/functions/columns";
 import {addLabelToCard, createCard, deleteCard, removeLabelFromCard, updateCardContent, updateCardOrder, updateCardTitle} from "~/server/functions/cards";
 
 
-// --- BOARDS ----------------------------------------------------
+// --- BOARDS LIST ----------------------------------------------------
 
-export function useCreateBoardMutation() {
+export const useCreateBoardMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: createBoard,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.boardsList() }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey }),
     });
-}
+};
 
 
-export function useUpdateBoardMutation() {
+export const useUpdateBoardMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -30,36 +30,37 @@ export function useUpdateBoardMutation() {
             })
         }
     })
-}
+};
 
 
-export function useDeleteBoardMutation() {
+export const useDeleteBoardMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: deleteBoard,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.boardsList() }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey }),
     });
-}
+};
 
 
-// --- COLUMNS ----------------------------------------------------
+// --- COLUMNS --------------------------------------------------------
 
-export function useCreateColumnMutation() {
+export const useCreateColumnMutation = () => {
     const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: createColumn,
         onSuccess: (data) => {
             queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
                 if (!oldData) return;
-                return { ...oldData, columns: [...oldData.columns, data] }
+                return { ...oldData, columns: [...oldData.columns, data] };
             });
         }
     })
-}
+};
 
 
-export function useUpdateColumnMutation(boardId: number) {
+export const useUpdateColumnMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -76,13 +77,13 @@ export function useUpdateColumnMutation(boardId: number) {
             })
         },
         onSettled: () => {
-            return queryClient.invalidateQueries({ queryKey: queryKeys.boardDetails(boardId) });
+            return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
         },
     })
-}
+};
 
 
-export function useDeleteColumnMutation() {
+export const useDeleteColumnMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -98,12 +99,12 @@ export function useDeleteColumnMutation() {
             });
         },
     })
-}
+};
 
 
 // --- COLUMNS ----------------------------------------------------
 
-export function useCreateCardMutation(boardId: number) {
+export const useCreateCardMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -115,10 +116,10 @@ export function useCreateCardMutation(boardId: number) {
             });
         }
     })
-}
+};
 
 
-export function useUpdateCardOrderMutation(boardId: number) {
+export const useUpdateCardOrderMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -135,13 +136,13 @@ export function useUpdateCardOrderMutation(boardId: number) {
             })
         },
         onSettled: () => {
-            return queryClient.invalidateQueries({ queryKey: queryKeys.boardDetails(boardId) });
+            return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
         },
     })
-}
+};
 
 
-export function useUpdateCardTitleMutation(boardId: number) {
+export const useUpdateCardTitleMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -156,10 +157,10 @@ export function useUpdateCardTitleMutation(boardId: number) {
             })
         },
     })
-}
+};
 
 
-export function useUpdateCardContentMutation(boardId: number) {
+export const useUpdateCardContentMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -174,10 +175,10 @@ export function useUpdateCardContentMutation(boardId: number) {
             })
         },
     })
-}
+};
 
 
-export function useDeleteCardMutation(boardId: number) {
+export const useDeleteCardMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -192,10 +193,10 @@ export function useDeleteCardMutation(boardId: number) {
             });
         },
     })
-}
+};
 
 
-export function useAddLabelToCardMutation(boardId: number) {
+export const useAddLabelToCardMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -210,10 +211,10 @@ export function useAddLabelToCardMutation(boardId: number) {
             });
         },
     })
-}
+};
 
 
-export function useRemoveLabelFromCardMutation(boardId: number) {
+export const useRemoveLabelFromCardMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -230,12 +231,12 @@ export function useRemoveLabelFromCardMutation(boardId: number) {
             });
         },
     })
-}
+};
 
 
 // --- LABELS ----------------------------------------------------
 
-export function useCreateLabelMutation() {
+export const useCreateLabelMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -250,10 +251,10 @@ export function useCreateLabelMutation() {
             });
         },
     });
-}
+};
 
 
-export function useUpdateLabelMutation() {
+export const useUpdateLabelMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -268,10 +269,10 @@ export function useUpdateLabelMutation() {
             });
         },
     })
-}
+};
 
 
-export function useDeleteLabelMutation() {
+export const useDeleteLabelMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -289,4 +290,4 @@ export function useDeleteLabelMutation() {
             });
         },
     });
-}
+};

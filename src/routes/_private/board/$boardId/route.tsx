@@ -8,7 +8,7 @@ import React, {useCallback, useMemo, useRef} from "react";
 import {EditableText} from "~/components/board/EditableText";
 import {useUpdateBoardMutation} from "~/react-query/mutations";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import {boardDetailsOptions, queryKeys} from "~/react-query/query-options";
+import {authOptions, boardDetailsOptions} from "~/react-query/query-options";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 
 
@@ -106,7 +106,7 @@ function BoardPage() {
     const handleLogout = async () => {
         await authClient.signOut();
         await router.invalidate();
-        queryClient.setQueryData(queryKeys.authKey(), null);
+        queryClient.setQueryData(authOptions.queryKey, null);
         await navigate({ to: "/", replace: true });
         queryClient.removeQueries();
     }

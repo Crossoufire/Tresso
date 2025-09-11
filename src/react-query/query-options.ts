@@ -3,27 +3,20 @@ import {getCurrentUser} from "~/server/functions/auth";
 import {getBoard, getBoards} from "~/server/functions/boards";
 
 
-export const queryKeys = {
-    authKey: () => ["currentUser"] as const,
-    boardsList: () => ["boards", "list"] as const,
-    boardDetails: (boardId: number) => ["boards", "detail", boardId] as const,
-}
-
-
-export const authOptions = () => queryOptions({
-    queryKey: queryKeys.authKey(),
+export const authOptions = queryOptions({
+    queryKey: ["currentUser"],
     queryFn: () => getCurrentUser(),
     staleTime: 10 * 60 * 1000,
 })
 
 
-export const boardsListOptions = () => queryOptions({
-    queryKey: queryKeys.boardsList(),
+export const boardsListOptions = queryOptions({
+    queryKey: ["boards", "list"],
     queryFn: () => getBoards(),
 })
 
 
 export const boardDetailsOptions = (boardId: number) => queryOptions({
-    queryKey: queryKeys.boardDetails(boardId),
+    queryKey: ["boards", "detail", boardId],
     queryFn: () => getBoard({ data: { boardId } }),
 })

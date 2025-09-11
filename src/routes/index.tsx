@@ -1,7 +1,7 @@
 import {toast} from "sonner";
 import authClient from "~/utils/auth-client";
 import {Button} from "~/components/ui/button";
-import {queryKeys} from "~/react-query/query-options";
+import {authOptions} from "~/react-query/query-options";
 import {createFileRoute, redirect} from "@tanstack/react-router";
 import {CheckSquare, LogIn, StretchVertical, Zap} from "lucide-react";
 
@@ -9,10 +9,10 @@ import {CheckSquare, LogIn, StretchVertical, Zap} from "lucide-react";
 export const Route = createFileRoute("/")({
     validateSearch: ({ search }) => search as { authExpired?: boolean },
     beforeLoad: async ({ context: { queryClient }, search }) => {
-        const currentUser = queryClient.getQueryData(queryKeys.authKey());
+        const currentUser = queryClient.getQueryData(authOptions.queryKey);
 
         if (search.authExpired) {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.authKey() });
+            await queryClient.invalidateQueries({ queryKey: authOptions.queryKey });
             queryClient.clear();
             throw redirect({ to: "/", replace: true });
         }

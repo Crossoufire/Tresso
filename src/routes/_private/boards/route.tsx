@@ -5,7 +5,7 @@ import {Button} from "~/components/ui/button";
 import {getBoardGradient} from "~/utils/gradients";
 import {Card, CardHeader, CardTitle} from "~/components/ui/card";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import {boardsListOptions, queryKeys} from "~/react-query/query-options";
+import {authOptions, boardsListOptions} from "~/react-query/query-options";
 import {Calendar, LogOut, MoreHorizontal, Plus, Users} from "lucide-react";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {useCreateBoardMutation, useDeleteBoardMutation} from "~/react-query/mutations";
@@ -14,7 +14,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 
 export const Route = createFileRoute("/_private/boards")({
     loader: ({ context: { queryClient } }) => {
-        return queryClient.ensureQueryData(boardsListOptions());
+        return queryClient.ensureQueryData(boardsListOptions);
     },
     component: BoardsPage,
 })
@@ -26,7 +26,7 @@ function BoardsPage() {
     const queryClient = useQueryClient();
     const createBoardMutation = useCreateBoardMutation();
     const deleteBoardMutation = useDeleteBoardMutation();
-    const boardsList = useSuspenseQuery(boardsListOptions()).data;
+    const boardsList = useSuspenseQuery(boardsListOptions).data;
 
     const onNewBoardClick = (name: string, color: string) => {
         createBoardMutation.mutate({ data: { name, color } });
@@ -45,7 +45,7 @@ function BoardsPage() {
     const handleLogout = async () => {
         await authClient.signOut();
         await router.invalidate();
-        queryClient.setQueryData(queryKeys.authKey(), null);
+        queryClient.setQueryData(authOptions.queryKey, null);
         await navigate({ to: "/", replace: true });
         queryClient.removeQueries();
     }
