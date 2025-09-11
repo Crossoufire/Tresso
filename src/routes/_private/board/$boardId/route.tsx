@@ -1,15 +1,15 @@
-import {ColumnWithCards} from "~/types/types";
-import {Column} from "~/components/board/Column";
-import {NewColumn} from "~/components/board/NewColumn";
-import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
-import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import React, {useCallback, useMemo, useRef} from "react";
-import {useUpdateBoardMutation} from "~/react-query/mutations";
-import {boardDetailsOptions, queryKeys} from "~/react-query/query-options";
 import authClient from "~/utils/auth-client";
-import {EditableText} from "~/components/board/EditableText";
+import {ColumnWithCards} from "~/types/types";
 import {Button} from "~/components/ui/button";
 import {ArrowLeft, LogOut} from "lucide-react";
+import {Column} from "~/components/board/Column";
+import {NewColumn} from "~/components/board/NewColumn";
+import React, {useCallback, useMemo, useRef} from "react";
+import {EditableText} from "~/components/board/EditableText";
+import {useUpdateBoardMutation} from "~/react-query/mutations";
+import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
+import {boardDetailsOptions, queryKeys} from "~/react-query/query-options";
+import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 
 
 export const Route = createFileRoute("/_private/board/$boardId")({
@@ -31,6 +31,7 @@ function BoardPage() {
     const updateBoardMutation = useUpdateBoardMutation();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const boardData = useSuspenseQuery(boardDetailsOptions(boardId)).data;
+
 
     const handleMouseUp = () => {
         isDown.current = false;

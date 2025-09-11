@@ -22,23 +22,19 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded }: NewColum
     const onSubmitHandler = (ev: React.FormEvent<HTMLFormElement>) => {
         ev.preventDefault();
         if (!inputRef.current) return;
+
         createColMutation.mutate({ data: { boardId, name: inputRef.current.value } }, {
             onSuccess: () => toast.success("New Column Created!"),
         });
+
         inputRef.current.value = "";
         onNewColumnAdded();
-    };
-
-    const onBlurHandler = (ev: React.FocusEvent<HTMLFormElement>) => {
-        if (!ev.currentTarget.contains(ev.relatedTarget)) {
-            // setEditing(false);
-        }
     };
 
     return (
         <>
             {editing ?
-                <form onBlur={onBlurHandler} onSubmit={onSubmitHandler}>
+                <form onSubmit={onSubmitHandler}>
                     <Card className="min-w-72 ml-3">
                         <CardHeader>
                             <CardTitle>Add Column</CardTitle>
@@ -46,10 +42,10 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded }: NewColum
                         </CardHeader>
                         <CardContent>
                             <Input
+                                required
+                                autoFocus
                                 type="text"
                                 ref={inputRef}
-                                required={true}
-                                autoFocus={true}
                                 name="columnName"
                                 autoComplete="off"
                                 placeholder="Enter a name..."
@@ -57,10 +53,10 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded }: NewColum
                             />
                         </CardContent>
                         <CardFooter className="flex justify-end items-center gap-3">
-                            <Button variant="destructive" onClick={() => setEditing(false)} disabled={createColMutation.isPending}>
+                            <Button variant="destructive" type="button" onClick={() => setEditing(false)} disabled={createColMutation.isPending}>
                                 Cancel
                             </Button>
-                            <Button variant="default" disabled={createColMutation.isPending}>
+                            <Button variant="default" type="submit" disabled={createColMutation.isPending}>
                                 {createColMutation.isPending ? <Loader2 className="animate-spin"/> : "Add"}
                             </Button>
                         </CardFooter>
