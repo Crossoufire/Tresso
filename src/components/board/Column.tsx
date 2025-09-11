@@ -1,11 +1,10 @@
 import {toast} from "sonner";
 import {flushSync} from "react-dom";
-import {Card} from "~/components/board/Card";
-import invariant from "tiny-invariant";
 import {twMerge} from "tailwind-merge";
-import {NewCard} from "~/components/board/NewCard";
+import {Card} from "~/components/board/Card";
 import {Button} from "~/components/ui/button";
 import {MoreHorizontal, Plus} from "lucide-react";
+import {NewCard} from "~/components/board/NewCard";
 import {EditableText} from "~/components/board/EditableText";
 import {ColumnWithCards, CONTENT_TYPES} from "~/types/types";
 import React, {useCallback, useMemo, useRef, useState} from "react";
@@ -84,7 +83,6 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
 
     const onClickHandler = () => {
         flushSync(() => setEdit(true));
-        invariant(listRef.current);
         listRef.current.scrollTop = listRef.current.scrollHeight;
     }
 

@@ -1,12 +1,13 @@
 import React from "react";
 import {toast} from "sonner";
+import authClient from "~/utils/auth-client";
 import {Button} from "~/components/ui/button";
 import {getBoardGradient} from "~/utils/gradients";
-import {useSuspenseQuery} from "@tanstack/react-query";
-import {createFileRoute, Link} from "@tanstack/react-router";
-import {boardsListOptions} from "~/react-query/query-options";
 import {Card, CardHeader, CardTitle} from "~/components/ui/card";
-import {Calendar, MoreHorizontal, Plus, Users} from "lucide-react";
+import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
+import {boardsListOptions, queryKeys} from "~/react-query/query-options";
+import {Calendar, LogOut, MoreHorizontal, Plus, Users} from "lucide-react";
+import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {useCreateBoardMutation, useDeleteBoardMutation} from "~/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/components/ui/dropdown-menu";
 
@@ -20,6 +21,9 @@ export const Route = createFileRoute("/_private/boards")({
 
 
 function BoardsPage() {
+    const router = useRouter();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const createBoardMutation = useCreateBoardMutation();
     const deleteBoardMutation = useDeleteBoardMutation();
     const boardsList = useSuspenseQuery(boardsListOptions()).data;
@@ -38,18 +42,34 @@ function BoardsPage() {
         });
     }
 
+    const handleLogout = async () => {
+        await authClient.signOut();
+        await router.invalidate();
+        queryClient.setQueryData(queryKeys.authKey(), null);
+        await navigate({ to: "/", replace: true });
+        queryClient.removeQueries();
+    }
+
     return (
-        <div className="max-w-7xl p-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-1">Your Boards</h1>
-                <p className="text-muted-foreground">Manage and organize your projects with ease</p>
+        <div className="p-6">
+            <title>{`Your Boards - Tresso`}</title>
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold mb-1">Your Boards</h1>
+                    <p className="text-muted-foreground">Manage and organize your projects with ease</p>
+                </div>
+                <Button variant="ghost" onClick={handleLogout}>
+                    <LogOut className="size-4 mr-1"/> Logout
+                </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
                 {boardsList.map((board, idx) =>
                     <Link key={board.id} to="/board/$boardId" params={{ boardId: board.id }} className="group">
-                        <Card className={`h-[160px] transition-all duration-200 cursor-pointer border-2 hover:border-primary/30 
-                        ${getBoardGradient(board.id, idx)} relative overflow-hidden`}>
+                        <Card
+                            className={`h-[160px] transition-all duration-200 cursor-pointer border-2 
+                            hover:border-primary/30 ${getBoardGradient(board.id, idx)} relative overflow-hidden`}
+                        >
                             <CardHeader className="h-full flex flex-col justify-between p-6">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 min-w-0">
@@ -84,9 +104,12 @@ function BoardsPage() {
                                             <Users className="h-3 w-3"/>
                                             <span>1</span>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="size-3"/>
-                                            <span>{board.createdAt.toLocaleDateString()}</span>
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="size-4"/>
+                                            <div>
+                                                <div>Created</div>
+                                                <div>{board.createdAt.toLocaleDateString()}</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

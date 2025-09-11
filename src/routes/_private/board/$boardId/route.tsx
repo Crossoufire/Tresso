@@ -113,6 +113,7 @@ function BoardPage() {
 
     return (
         <div className="flex flex-col h-screen">
+            <title>{`${boardData.name} - Tresso`}</title>
             <header className="flex items-center justify-between p-4 border-b  backdrop-blur-sm flex-shrink-0">
                 <div className="flex items-center gap-4">
                     <Button size="sm" variant="ghost" asChild={true}>

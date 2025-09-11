@@ -12,8 +12,8 @@ export const boards = sqliteTable("boards", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     color: text("color").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
     userId: integer("user_id").notNull().references(() => user.id),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
 });
 
 
