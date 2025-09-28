@@ -1,5 +1,5 @@
 import {registerGlobalMiddleware} from "@tanstack/react-start";
-import {errorMiddleware} from "~/server/middlewares/global-error";
+import {errorMiddleware} from "~/lib/server/middlewares/global-error";
 
 
 registerGlobalMiddleware({

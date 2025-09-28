@@ -1,15 +1,15 @@
 import React from "react";
 import {toast} from "sonner";
-import authClient from "~/utils/auth-client";
-import {Button} from "~/components/ui/button";
-import {getBoardGradient} from "~/utils/gradients";
-import {Card, CardHeader, CardTitle} from "~/components/ui/card";
+import authClient from "~/lib/utils/auth-client";
+import {Button} from "~/lib/client/components/ui/button";
+import {getBoardGradient} from "~/lib/utils/gradients";
+import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import {authOptions, boardsListOptions} from "~/react-query/query-options";
+import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
 import {Calendar, LogOut, MoreHorizontal, Plus, Users} from "lucide-react";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
-import {useCreateBoardMutation, useDeleteBoardMutation} from "~/react-query/mutations";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/components/ui/dropdown-menu";
+import {useCreateBoardMutation, useDeleteBoardMutation} from "~/lib/client/react-query/mutations";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
 export const Route = createFileRoute("/_private/boards")({

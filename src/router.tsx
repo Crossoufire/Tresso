@@ -1,9 +1,9 @@
 import "./global-middleware";
 import {toast} from "sonner";
 import {routeTree} from "~/routeTree.gen";
-import {NotFound} from "~/components/NotFound";
+import {NotFound} from "~/lib/client/components/NotFound";
 import {MutationCache, QueryClient} from "@tanstack/react-query";
-import {ErrorCatchBoundary} from "~/components/ErrorCatchBoundary";
+import {ErrorCatchBoundary} from "~/lib/client/components/ErrorCatchBoundary";
 import {routerWithQueryClient} from "@tanstack/react-router-with-query";
 import {createRouter as createTanStackRouter} from "@tanstack/react-router";
 

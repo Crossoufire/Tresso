@@ -1,5 +1,5 @@
-import {authOptions} from "~/react-query/query-options";
 import {createFileRoute, redirect} from "@tanstack/react-router";
+import {authOptions} from "~/lib/client/react-query/query-options";
 
 
 export const Route = createFileRoute("/_private")({

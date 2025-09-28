@@ -1,14 +1,14 @@
-import authClient from "~/utils/auth-client";
-import {ColumnWithCards} from "~/types/types";
-import {Button} from "~/components/ui/button";
+import authClient from "~/lib/utils/auth-client";
+import {ColumnWithCards} from "~/lib/types/types";
+import {Button} from "~/lib/client/components/ui/button";
 import {ArrowLeft, LogOut} from "lucide-react";
-import {Column} from "~/components/board/Column";
-import {NewColumn} from "~/components/board/NewColumn";
+import {Column} from "~/lib/client/components/board/Column";
+import {NewColumn} from "~/lib/client/components/board/NewColumn";
 import React, {useCallback, useMemo, useRef} from "react";
-import {EditableText} from "~/components/board/EditableText";
-import {useUpdateBoardMutation} from "~/react-query/mutations";
+import {EditableText} from "~/lib/client/components/board/EditableText";
+import {useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import {authOptions, boardDetailsOptions} from "~/react-query/query-options";
+import {authOptions, boardDetailsOptions} from "~/lib/client/react-query/query-options";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 
 

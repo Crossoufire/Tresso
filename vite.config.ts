@@ -1,8 +1,12 @@
+import {config} from "dotenv";
 import {defineConfig} from "vite";
 import tailwindcss from "@tailwindcss/vite";
-import reactVite from "@vitejs/plugin-react";
+import viteReact from "@vitejs/plugin-react";
 import tsConfigPaths from "vite-tsconfig-paths";
 import {tanstackStart} from "@tanstack/react-start/plugin/vite";
+
+
+config();
 
 
 export default defineConfig({
@@ -13,12 +17,12 @@ export default defineConfig({
         tsConfigPaths({ projects: ["./tsconfig.json"] }),
         tailwindcss(),
         tanstackStart({
-            customViteReactPlugin: true,
             spa: {
                 enabled: true,
             },
+            customViteReactPlugin: true,
         }),
-        reactVite({
+        viteReact({
             babel: {
                 plugins: [["babel-plugin-react-compiler", { target: "19" }]],
             },

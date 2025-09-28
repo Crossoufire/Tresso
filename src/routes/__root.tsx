@@ -2,8 +2,8 @@
 import {Toaster} from "sonner";
 import React, {lazy} from "react";
 import appCss from "~/styles.css?url";
-import type {QueryClient} from "@tanstack/react-query";
-import {authOptions} from "~/react-query/query-options";
+import {QueryClient} from "@tanstack/react-query";
+import {authOptions} from "~/lib/client/react-query/query-options";
 import {createRootRouteWithContext, HeadContent, Outlet, Scripts} from "@tanstack/react-router";
 
 
@@ -64,6 +64,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 const TanStackRouterDevtools = lazy(() =>
     import("@tanstack/react-router-devtools").then((res) => ({ default: res.TanStackRouterDevtools }))
 );
+
 
 const ReactQueryDevtools = lazy(() =>
     import("@tanstack/react-query-devtools").then((res) => ({ default: res.ReactQueryDevtools }))

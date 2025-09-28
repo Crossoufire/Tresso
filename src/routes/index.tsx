@@ -1,8 +1,8 @@
 import {toast} from "sonner";
-import authClient from "~/utils/auth-client";
-import {Button} from "~/components/ui/button";
-import {authOptions} from "~/react-query/query-options";
+import authClient from "~/lib/utils/auth-client";
+import {Button} from "~/lib/client/components/ui/button";
 import {createFileRoute, redirect} from "@tanstack/react-router";
+import {authOptions} from "~/lib/client/react-query/query-options";
 import {CheckSquare, LogIn, StretchVertical, Zap} from "lucide-react";
 
 
