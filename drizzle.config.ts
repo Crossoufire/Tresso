@@ -9,7 +9,7 @@ export default {
     breakpoints: true,
     dialect: "sqlite",
     casing: "snake_case",
-    schema: "./src/server/database/schemas/index.ts",
+    schema: "./src/lib/server/database/schemas/index.ts",
     dbCredentials: {
         url: serverEnv.DATABASE_URL,
     },
