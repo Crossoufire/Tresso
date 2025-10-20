@@ -32,8 +32,7 @@ Follow these instructions to get a local instance of Tresso up and running.
 
 ### Prerequisites
 
-- Node.js (v20+)
-- A package manager (npm, yarn, or pnpm)
+- BUn (v1.3+)
 - Google OAuth credentials from Google Cloud Console.
 
 #### 1. Clone the Repository
@@ -46,7 +45,7 @@ cd tresso
 #### 2. Install Dependencies
 
 ```bash
-npm install
+bun install
 ```
 
 #### 3. Set Up The Env Variables
@@ -82,7 +81,7 @@ This project uses Drizzle ORM to manage the database schema.
 Run the following command to push the schema from `src/server/database/schemas` to your SQLite DB.
 
 ```bash
-npm run dk push
+bun run dk push
 ```
 
 #### 5. Run the App
@@ -90,7 +89,7 @@ npm run dk push
 You can now start the dev server with:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000).
