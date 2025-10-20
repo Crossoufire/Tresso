@@ -1,4 +1,3 @@
-import {config} from "dotenv";
 import {defineConfig} from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import viteReact from "@vitejs/plugin-react";
@@ -6,13 +5,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import {tanstackStart} from "@tanstack/react-start/plugin/vite";
 
 
-config();
-
-
 export default defineConfig({
-    server: {
-        port: 3000,
-    },
     plugins: [
         tsConfigPaths({ projects: ["./tsconfig.json"] }),
         tailwindcss(),
@@ -20,7 +13,10 @@ export default defineConfig({
             spa: {
                 enabled: true,
             },
-            customViteReactPlugin: true,
+            router: {
+                semicolons: true,
+                quoteStyle: "double",
+            },
         }),
         viteReact({
             babel: {

@@ -8,166 +8,147 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createServerRootRoute } from '@tanstack/react-start/server'
-
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as PrivateRouteImport } from './routes/_private'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as PrivateBoardsRouteRouteImport } from './routes/_private/boards/route'
-import { Route as PrivateBoardBoardIdRouteRouteImport } from './routes/_private/board/$boardId/route'
-import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
-
-const rootServerRouteImport = createServerRootRoute()
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as PrivateRouteImport } from "./routes/_private";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as PrivateBoardsRouteRouteImport } from "./routes/_private/boards/route";
+import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth/$";
+import { Route as PrivateBoardBoardIdRouteRouteImport } from "./routes/_private/board/$boardId/route";
 
 const PrivateRoute = PrivateRouteImport.update({
-  id: '/_private',
+  id: "/_private",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const PrivateBoardsRouteRoute = PrivateBoardsRouteRouteImport.update({
-  id: '/boards',
-  path: '/boards',
+  id: "/boards",
+  path: "/boards",
   getParentRoute: () => PrivateRoute,
-} as any)
+} as any);
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: "/api/auth/$",
+  path: "/api/auth/$",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const PrivateBoardBoardIdRouteRoute =
   PrivateBoardBoardIdRouteRouteImport.update({
-    id: '/board/$boardId',
-    path: '/board/$boardId',
+    id: "/board/$boardId",
+    path: "/board/$boardId",
     getParentRoute: () => PrivateRoute,
-  } as any)
-const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
+  } as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/boards': typeof PrivateBoardsRouteRoute
-  '/board/$boardId': typeof PrivateBoardBoardIdRouteRoute
+  "/": typeof IndexRoute;
+  "/boards": typeof PrivateBoardsRouteRoute;
+  "/board/$boardId": typeof PrivateBoardBoardIdRouteRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/boards': typeof PrivateBoardsRouteRoute
-  '/board/$boardId': typeof PrivateBoardBoardIdRouteRoute
+  "/": typeof IndexRoute;
+  "/boards": typeof PrivateBoardsRouteRoute;
+  "/board/$boardId": typeof PrivateBoardBoardIdRouteRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_private': typeof PrivateRouteWithChildren
-  '/_private/boards': typeof PrivateBoardsRouteRoute
-  '/_private/board/$boardId': typeof PrivateBoardBoardIdRouteRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/_private": typeof PrivateRouteWithChildren;
+  "/_private/boards": typeof PrivateBoardsRouteRoute;
+  "/_private/board/$boardId": typeof PrivateBoardBoardIdRouteRoute;
+  "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/boards' | '/board/$boardId'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/boards' | '/board/$boardId'
+  fileRoutesByFullPath: FileRoutesByFullPath;
+  fullPaths: "/" | "/boards" | "/board/$boardId" | "/api/auth/$";
+  fileRoutesByTo: FileRoutesByTo;
+  to: "/" | "/boards" | "/board/$boardId" | "/api/auth/$";
   id:
-    | '__root__'
-    | '/'
-    | '/_private'
-    | '/_private/boards'
-    | '/_private/board/$boardId'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/_private"
+    | "/_private/boards"
+    | "/_private/board/$boardId"
+    | "/api/auth/$";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  PrivateRoute: typeof PrivateRouteWithChildren
-}
-export interface FileServerRoutesByFullPath {
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRoutesByTo {
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRoutesById {
-  __root__: typeof rootServerRouteImport
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRouteTypes {
-  fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/auth/$'
-  fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/auth/$'
-  id: '__root__' | '/api/auth/$'
-  fileServerRoutesById: FileServerRoutesById
-}
-export interface RootServerRouteChildren {
-  ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
+  IndexRoute: typeof IndexRoute;
+  PrivateRoute: typeof PrivateRouteWithChildren;
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/_private': {
-      id: '/_private'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof PrivateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_private/boards': {
-      id: '/_private/boards'
-      path: '/boards'
-      fullPath: '/boards'
-      preLoaderRoute: typeof PrivateBoardsRouteRouteImport
-      parentRoute: typeof PrivateRoute
-    }
-    '/_private/board/$boardId': {
-      id: '/_private/board/$boardId'
-      path: '/board/$boardId'
-      fullPath: '/board/$boardId'
-      preLoaderRoute: typeof PrivateBoardBoardIdRouteRouteImport
-      parentRoute: typeof PrivateRoute
-    }
-  }
-}
-declare module '@tanstack/react-start/server' {
-  interface ServerFileRoutesByPath {
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
+    "/_private": {
+      id: "/_private";
+      path: "";
+      fullPath: "";
+      preLoaderRoute: typeof PrivateRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_private/boards": {
+      id: "/_private/boards";
+      path: "/boards";
+      fullPath: "/boards";
+      preLoaderRoute: typeof PrivateBoardsRouteRouteImport;
+      parentRoute: typeof PrivateRoute;
+    };
+    "/api/auth/$": {
+      id: "/api/auth/$";
+      path: "/api/auth/$";
+      fullPath: "/api/auth/$";
+      preLoaderRoute: typeof ApiAuthSplatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_private/board/$boardId": {
+      id: "/_private/board/$boardId";
+      path: "/board/$boardId";
+      fullPath: "/board/$boardId";
+      preLoaderRoute: typeof PrivateBoardBoardIdRouteRouteImport;
+      parentRoute: typeof PrivateRoute;
+    };
   }
 }
 
 interface PrivateRouteChildren {
-  PrivateBoardsRouteRoute: typeof PrivateBoardsRouteRoute
-  PrivateBoardBoardIdRouteRoute: typeof PrivateBoardBoardIdRouteRoute
+  PrivateBoardsRouteRoute: typeof PrivateBoardsRouteRoute;
+  PrivateBoardBoardIdRouteRoute: typeof PrivateBoardBoardIdRouteRoute;
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
   PrivateBoardsRouteRoute: PrivateBoardsRouteRoute,
   PrivateBoardBoardIdRouteRoute: PrivateBoardBoardIdRouteRoute,
-}
+};
 
 const PrivateRouteWithChildren =
-  PrivateRoute._addFileChildren(PrivateRouteChildren)
+  PrivateRoute._addFileChildren(PrivateRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivateRoute: PrivateRouteWithChildren,
-}
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
-const rootServerRouteChildren: RootServerRouteChildren = {
-  ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
+  ._addFileTypes<FileRouteTypes>();
+
+import type { getRouter } from "./router.tsx";
+import type { startInstance } from "./start.ts";
+declare module "@tanstack/react-start" {
+  interface Register {
+    ssr: true;
+    router: Awaited<ReturnType<typeof getRouter>>;
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
+  }
 }
-export const serverRouteTree = rootServerRouteImport
-  ._addFileChildren(rootServerRouteChildren)
-  ._addFileTypes<FileServerRouteTypes>()

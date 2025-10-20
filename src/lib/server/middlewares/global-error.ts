@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import z from "zod";
 import {createMiddleware} from "@tanstack/react-start";
 import {FormattedError} from "~/lib/utils/error-classes";
 

@@ -1,7 +1,7 @@
-import {db} from "~/lib/server/database/db";
 import {and, eq} from "drizzle-orm";
-import * as s from "~/lib/server/database/schemas";
+import {db} from "~/lib/server/database/db";
 import {notFound} from "@tanstack/router-core";
+import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createLabelSchema, deleteLabelSchema, updateLabelSchema} from "~/lib/utils/zod";
@@ -9,7 +9,7 @@ import {createLabelSchema, deleteLabelSchema, updateLabelSchema} from "~/lib/uti
 
 export const createLabel = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(createLabelSchema)
+    .inputValidator(createLabelSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const targetBoard = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id)),
@@ -30,7 +30,7 @@ export const createLabel = createServerFn({ method: "POST" })
 
 export const updateLabel = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(updateLabelSchema)
+    .inputValidator(updateLabelSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const label = await db.query.labels.findFirst({
             where: eq(s.labels.id, data.id),
@@ -53,7 +53,7 @@ export const updateLabel = createServerFn({ method: "POST" })
 
 export const deleteLabel = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(deleteLabelSchema)
+    .inputValidator(deleteLabelSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const label = await db.query.labels.findFirst({
             where: eq(s.labels.id, data.id),

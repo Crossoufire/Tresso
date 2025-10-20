@@ -1,10 +1,10 @@
 import {auth} from "~/lib/server/auth/auth";
 import {createServerFn} from "@tanstack/react-start";
-import {getWebRequest} from "@tanstack/react-start/server";
+import {getRequest} from "@tanstack/react-start/server";
 
 
 export const getCurrentUser = createServerFn({ method: "GET" }).handler(async () => {
-    const { headers } = getWebRequest();
+    const { headers } = getRequest();
     const session = await auth.api.getSession({ headers, query: { disableCookieCache: true } });
 
     if (!session?.user) {

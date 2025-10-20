@@ -1,14 +1,13 @@
-import "./global-middleware";
 import {toast} from "sonner";
 import {routeTree} from "~/routeTree.gen";
+import {createRouter} from "@tanstack/react-router";
 import {NotFound} from "~/lib/client/components/NotFound";
 import {MutationCache, QueryClient} from "@tanstack/react-query";
 import {ErrorCatchBoundary} from "~/lib/client/components/ErrorCatchBoundary";
-import {routerWithQueryClient} from "@tanstack/react-router-with-query";
-import {createRouter as createTanStackRouter} from "@tanstack/react-router";
+import {setupRouterSsrQueryIntegration} from "@tanstack/react-router-ssr-query";
 
 
-export function createRouter() {
+export function getRouter() {
     const queryClient: QueryClient = new QueryClient({
         mutationCache: new MutationCache({
             onError: (error) => {
@@ -25,27 +24,23 @@ export function createRouter() {
         },
     });
 
-    const router = routerWithQueryClient(
-        createTanStackRouter({
-            routeTree,
-            context: { queryClient },
-            defaultSsr: false,
-            defaultPreload: false,
-            scrollRestoration: true,
-            defaultPreloadStaleTime: 0,
-            defaultStructuralSharing: true,
-            defaultNotFoundComponent: NotFound,
-            defaultErrorComponent: ErrorCatchBoundary,
-        }),
+    const router = createRouter({
+        routeTree,
+        defaultPreload: false,
+        scrollRestoration: true,
+        context: { queryClient },
+        defaultPreloadStaleTime: 0,
+        defaultStructuralSharing: true,
+        defaultNotFoundComponent: NotFound,
+        defaultErrorComponent: ErrorCatchBoundary,
+    })
+
+    setupRouterSsrQueryIntegration({
+        router,
         queryClient,
-    )
+        handleRedirects: true,
+        wrapQueryClient: true,
+    });
 
     return router;
-}
-
-
-declare module "@tanstack/react-router" {
-    interface Register {
-        router: ReturnType<typeof createRouter>;
-    }
 }

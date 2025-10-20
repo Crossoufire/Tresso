@@ -1,8 +1,8 @@
 import * as z from "zod";
 import {db} from "~/lib/server/database/db";
-import * as s from "~/lib/server/database/schemas";
 import {and, asc, desc, eq} from "drizzle-orm";
 import {notFound} from "@tanstack/router-core";
+import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createBoardSchema, deleteBoardSchema, updateBoardSchema} from "~/lib/utils/zod";
@@ -21,7 +21,7 @@ export const getBoards = createServerFn({ method: "GET" })
 
 export const getBoard = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .validator(z.object({ boardId: z.number() }))
+    .inputValidator(z.object({ boardId: z.number() }))
     .handler(async ({ data: { boardId }, context: { currentUser } }) => {
         const boardData = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, boardId), eq(s.boards.userId, currentUser.id)),
@@ -53,7 +53,7 @@ export const getBoard = createServerFn({ method: "GET" })
 
 export const createBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(createBoardSchema)
+    .inputValidator(createBoardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const [newBoard] = await db
             .insert(s.boards)
@@ -68,7 +68,7 @@ export const createBoard = createServerFn({ method: "POST" })
 
 export const updateBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(updateBoardSchema)
+    .inputValidator(updateBoardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         await db
             .update(s.boards)
@@ -79,7 +79,7 @@ export const updateBoard = createServerFn({ method: "POST" })
 
 export const deleteBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .validator(deleteBoardSchema)
+    .inputValidator(deleteBoardSchema)
     .handler(async ({ data: { id }, context: { currentUser } }) => {
         await db
             .delete(s.boards)

@@ -2,11 +2,12 @@ import {betterAuth} from "better-auth";
 import {serverEnv} from "~/env/server";
 import {clientEnv} from "~/env/client";
 import {db} from "~/lib/server/database/db";
+import {createServerOnlyFn} from "@tanstack/react-start";
 import {reactStartCookies} from "better-auth/react-start";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
 
 
-export const auth = betterAuth({
+export const auth = createServerOnlyFn(() => betterAuth({
     appName: "Tresso",
     baseURL: clientEnv.VITE_BASE_URL,
     secret: serverEnv.BETTER_AUTH_SECRET,
@@ -28,4 +29,4 @@ export const auth = betterAuth({
     plugins: [
         reactStartCookies(),
     ]
-});
+}))();
