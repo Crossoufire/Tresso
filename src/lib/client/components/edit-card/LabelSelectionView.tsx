@@ -7,6 +7,7 @@ import {Checkbox} from "~/lib/client/components/ui/checkbox";
 import {ScrollArea} from "~/lib/client/components/ui/scroll-area";
 import {boardDetailsOptions} from "~/lib/client/react-query/query-options";
 import {useAddLabelToCardMutation, useRemoveLabelFromCardMutation} from "~/lib/client/react-query/mutations";
+import {Label} from "~/lib/client/components/ui/label";
 
 
 interface LabelSelectionViewProps {
@@ -41,33 +42,39 @@ export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete,
             <div className="flex items-center justify-between">
                 <h4 className="font-medium text-sm">Select Labels</h4>
                 <Button size="sm" variant="outline" onClick={onStartCreate}>
-                    <Plus className="h-3 w-3 mr-1"/> New
+                    <Plus className="size-4"/> New
                 </Button>
             </div>
             <ScrollArea className="h-48">
                 <div className="space-y-1">
                     {(boardLabels && boardLabels.length > 0) ?
-                        boardLabels.map((label) =>
-                            <div key={label.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
-                                <div className="flex items-center gap-2 flex-1">
-                                    <Checkbox
-                                        onCheckedChange={(value) => toggleLabelCardHandler(value, label)}
-                                        checked={card.labels.some((l) => l.id === label.id)}
-                                    />
-                                    <div className="w-3 h-3 rounded" style={{ backgroundColor: label.color }}/>
-                                    <span className="text-sm">{label.name}</span>
+                        boardLabels.map((label) => {
+                            const checkboxId = `label-checkbox-${label.id}`;
+                            return (
+                                <div key={label.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
+                                    <div className="flex items-center gap-2 flex-1">
+                                        <Checkbox
+                                            id={checkboxId}
+                                            checked={card.labels.some((l) => l.id === label.id)}
+                                            onCheckedChange={(value) => toggleLabelCardHandler(value, label)}
+                                        />
+                                        <Label htmlFor={checkboxId} className="flex-1 font-normal cursor-pointer select-none">
+                                            <div className="size-3 rounded shrink-0" style={{ backgroundColor: label.color }}/>
+                                            <div className="text-sm">{label.name}</div>
+                                        </Label>
+                                    </div>
+                                    <div className="flex gap-1">
+                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => onStartEdit(label)}>
+                                            <Edit2 className="h-2.5 w-2.5"/>
+                                        </Button>
+                                        <Button size="sm" variant="ghost" disabled={isPending} onClick={() => onDelete(label.id)}
+                                                className="h-6 w-6 p-0 text-destructive hover:text-destructive">
+                                            <Trash2 className="h-2.5 w-2.5"/>
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex gap-1">
-                                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => onStartEdit(label)}>
-                                        <Edit2 className="h-2.5 w-2.5"/>
-                                    </Button>
-                                    <Button size="sm" variant="ghost" disabled={isPending} onClick={() => onDelete(label.id)}
-                                            className="h-6 w-6 p-0 text-destructive hover:text-destructive">
-                                        <Trash2 className="h-2.5 w-2.5"/>
-                                    </Button>
-                                </div>
-                            </div>
-                        )
+                            );
+                        })
                         :
                         <div className="text-sm text-muted-foreground">
                             No labels found on this board.

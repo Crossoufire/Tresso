@@ -1,9 +1,9 @@
 import {Loader2} from "lucide-react";
 import {CardLabel} from "~/lib/types/types";
+import React, {useEffect, useState} from "react";
 import {Label} from "~/lib/client/components/ui/label";
 import {Input} from "~/lib/client/components/ui/input";
 import {Button} from "~/lib/client/components/ui/button";
-import React, {useEffect, useState} from "react";
 
 
 const LABEL_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#6b7280"];
@@ -24,6 +24,7 @@ export function LabelFormView({ mode, initialLabel, onSubmit, onBack, isPending 
 
     useEffect(() => {
         if (mode === "edit" && initialLabel) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName(initialLabel.name);
             setColor(initialLabel.color);
         }
@@ -44,9 +45,11 @@ export function LabelFormView({ mode, initialLabel, onSubmit, onBack, isPending 
                     <Label htmlFor="label-name" className="text-xs">Name</Label>
                     <Input
                         value={name}
+                        maxLength={25}
                         id="label-name"
                         placeholder="Enter label name..."
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(ev) => setName(ev.target.value)}
+                        onKeyDown={(ev) => ev.key === "Enter" && handleSubmit()}
                     />
                 </div>
                 <div className="space-y-1">

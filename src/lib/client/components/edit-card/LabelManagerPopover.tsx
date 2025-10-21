@@ -5,7 +5,7 @@ import React, {useReducer, useState} from "react";
 import {LabelFormView} from "~/lib/client/components/edit-card/LabelFormView";
 import {LabelSelectionView} from "~/lib/client/components/edit-card/LabelSelectionView";
 import {Popover, PopoverContent, PopoverTrigger,} from "~/lib/client/components/ui/popover";
-import {useCreateLabelMutation, useDeleteLabelMutation, useUpdateLabelMutation} from "~/lib/client/react-query/mutations";
+import {useAddLabelToCardMutation, useCreateLabelMutation, useDeleteLabelMutation, useUpdateLabelMutation} from "~/lib/client/react-query/mutations";
 
 
 type Action = { type: "START_CREATE" } | { type: "START_EDIT"; payload: CardLabel } | { type: "RESET" };
@@ -45,10 +45,14 @@ export function LabelManagerPopover({ card }: LabelManagerPopoverProps) {
     const deleteLabelMutation = useDeleteLabelMutation();
     const [isOpen, setIsOpen] = useState(false);
     const [state, dispatch] = useReducer(reducer, initialState);
+    const addLabelToCardMutation = useAddLabelToCardMutation(card.boardId);
 
     const handleCreate = (createData: { name: string; color: string }) => {
         createLabelMutation.mutate({ data: { ...createData, boardId: card.boardId } }, {
-            onSuccess: () => dispatch({ type: "RESET" }),
+            onSuccess: (newLabel) => {
+                dispatch({ type: "RESET" });
+                addLabelToCardMutation.mutate({ data: { cardId: card.id, labelId: newLabel.id } });
+            },
         });
     };
 

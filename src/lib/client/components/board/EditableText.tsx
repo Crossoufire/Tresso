@@ -9,7 +9,7 @@ interface EditableTextProps {
     inputClass?: string;
     buttonClass?: string;
     onChange: (value: string) => void;
-    editState: [boolean, (value: boolean) => void];
+    editState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }
 
 
@@ -63,7 +63,17 @@ export function EditableText({ fieldName, value, inputClass, buttonClass, onChan
     }
 
     return (
-        <Button ref={buttonRef} variant="ghost" className={buttonClass} onClick={onButtonClickHandler}>
+        <Button
+            ref={buttonRef}
+            variant="ghost"
+            className={buttonClass}
+            onClick={onButtonClickHandler}
+            style={{
+                whiteSpace: "normal",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+            }}
+        >
             {value}
         </Button>
     );

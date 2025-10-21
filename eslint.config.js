@@ -27,6 +27,7 @@ export default [
         rules: {
             "@eslint-react/dom/no-flush-sync": "off",
             "@eslint-react/naming-convention/use-state": "off",
+            "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
         },
     },
     ...tanstackQuery.configs["flat/recommended"],
