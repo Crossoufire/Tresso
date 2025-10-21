@@ -1,15 +1,23 @@
 import {Skull} from "lucide-react";
-import {ErrorComponent} from "~/lib/client/components/ErrorComponent";
 import type {ErrorComponentProps} from "@tanstack/react-router";
+import {ErrorComponent} from "~/lib/client/components/ErrorComponent";
 
 
-export function ErrorCatchBoundary({}: Readonly<ErrorComponentProps>) {
+export function ErrorCatchBoundary({ error }: Readonly<ErrorComponentProps>) {
+    if (!error.message) {
+        return (
+            <ErrorComponent
+                title="Well, This is Awkward"
+                icon={<Skull className="size-9"/>}
+                text="Sorry, it looks like something isn’t working right now. Please try refreshing the page or come back later."
+            />
+        )
+    }
+
     return (
         <ErrorComponent
-            title={"Well, This is Awkward"}
-            icon={<Skull className="w-10 h-10 animate-bounce"/>}
-            footerText={"If this keeps happening, we probably broke something important."}
-            text={"Sorry, it looks like something isn’t working right now. Please try refreshing the page or come back later."}
+            text={error.message}
+            title="An Error Occurred"
         />
     );
 }

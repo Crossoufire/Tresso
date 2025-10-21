@@ -5,9 +5,5 @@ export class FormattedError extends Error {
         super(message);
         this.name = "FormattedError";
         this.sendMail = sendMail;
-
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, FormattedError);
-        }
     }
 }

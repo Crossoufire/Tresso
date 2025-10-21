@@ -4,7 +4,7 @@ import {notFound} from "@tanstack/router-core";
 import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
-import {createColumnSchema, deleteColumnSchema, updateColumnSchema} from "~/lib/utils/zod";
+import {createColumnSchema, deleteColumnSchema, updateColumnSchema} from "~/lib/types/schemas";
 
 
 export const createColumn = createServerFn({ method: "POST" })

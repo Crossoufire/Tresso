@@ -145,7 +145,7 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
 						fieldName="name"
 						buttonClass="px-2"
 						editState={colNameEditState}
-						onChange={(value) => onChangeTextHandler(value)}
+						onChange={onChangeTextHandler}
 						inputClass="rounded-md py-2 px-2 font-medium text-sm"
 						value={(updateColumnMutation.isPending && updateColumnMutation.variables.data.name)
 							? updateColumnMutation.variables.data.name : col.name

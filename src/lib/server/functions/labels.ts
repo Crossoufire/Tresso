@@ -4,7 +4,7 @@ import {notFound} from "@tanstack/router-core";
 import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
-import {createLabelSchema, deleteLabelSchema, updateLabelSchema} from "~/lib/utils/zod";
+import {createLabelSchema, deleteLabelSchema, updateLabelSchema} from "~/lib/types/schemas";
 
 
 export const createLabel = createServerFn({ method: "POST" })

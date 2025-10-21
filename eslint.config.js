@@ -25,7 +25,8 @@ export default [
             "react-compiler": reactCompiler,
         },
         rules: {
-            "react-compiler/react-compiler": "error",
+            "@eslint-react/dom/no-flush-sync": "off",
+            "@eslint-react/naming-convention/use-state": "off",
         },
     },
     ...tanstackQuery.configs["flat/recommended"],
@@ -33,10 +34,8 @@ export default [
     {
         files: ["**/*.{js,jsx,ts,tsx}"],
         rules: {
-            "@eslint-react/no-array-index-key": "off",
             "@typescript-eslint/no-explicit-any": "off",
             "@eslint-react/no-unstable-context-value": "off",
-            "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
         },
     },
     {

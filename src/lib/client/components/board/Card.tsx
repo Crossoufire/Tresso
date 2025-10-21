@@ -95,8 +95,8 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                 >
                     {card.labels.length > 0 &&
                         <div className="flex flex-wrap gap-1 mb-3">
-                            {card.labels.map((label, idx) =>
-                                <Badge key={idx} style={{ backgroundColor: label.color }} className="py-0">
+                            {card.labels.map((label) =>
+                                <Badge key={label.id} style={{ backgroundColor: label.color }} className="py-0">
                                     {label.name}
                                 </Badge>
                             )}

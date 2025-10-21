@@ -5,7 +5,7 @@ import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {FormattedError} from "~/lib/utils/error-classes";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
-import {createCardSchema, deleteCardSchema, labelToCardSchema, updateCardContentSchema, updateCardSchema, updateCardTitleSchema} from "~/lib/utils/zod";
+import {createCardSchema, deleteCardSchema, labelToCardSchema, updateCardContentSchema, updateCardSchema, updateCardTitleSchema} from "~/lib/types/schemas";
 
 
 export const createCard = createServerFn({ method: "POST" })

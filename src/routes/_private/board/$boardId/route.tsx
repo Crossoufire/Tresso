@@ -1,15 +1,15 @@
+import {ArrowLeft, LogOut} from "lucide-react";
 import authClient from "~/lib/utils/auth-client";
 import {ColumnWithCards} from "~/lib/types/types";
 import {Button} from "~/lib/client/components/ui/button";
-import {ArrowLeft, LogOut} from "lucide-react";
 import {Column} from "~/lib/client/components/board/Column";
 import {NewColumn} from "~/lib/client/components/board/NewColumn";
-import React, {useCallback, useMemo, useRef} from "react";
+import React, {useCallback, useMemo, useRef, useState} from "react";
+import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {EditableText} from "~/lib/client/components/board/EditableText";
 import {useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
-import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import {authOptions, boardDetailsOptions} from "~/lib/client/react-query/query-options";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
+import {authOptions, boardDetailsOptions} from "~/lib/client/react-query/query-options";
 
 
 export const Route = createFileRoute("/_private/board/$boardId")({
@@ -28,10 +28,10 @@ function BoardPage() {
     const isDown = useRef(false);
     const scrollLeft = useRef(0);
     const newColumnAddedRef = useRef(false);
+    const boardNameEditState = useState(false);
     const updateBoardMutation = useUpdateBoardMutation();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const boardData = useSuspenseQuery(boardDetailsOptions(boardId)).data;
-
 
     const handleMouseUp = () => {
         isDown.current = false;
@@ -125,6 +125,7 @@ function BoardPage() {
                         <EditableText
                             fieldName="name"
                             buttonClass="text-2xl"
+                            editState={boardNameEditState}
                             onChange={onChangeBoardNameHandler}
                             inputClass="text-2xl font-medium rounded-md py-0.5 px-4 focus:outline-none focus:ring-2 focus:ring-gray-800"
                             value={(updateBoardMutation.isPending && updateBoardMutation.variables.data.name) ?

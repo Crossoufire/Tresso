@@ -1,11 +1,12 @@
-import * as z from "zod";
 import {db} from "~/lib/server/database/db";
 import {and, asc, desc, eq} from "drizzle-orm";
 import {notFound} from "@tanstack/router-core";
 import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
-import {createBoardSchema, deleteBoardSchema, updateBoardSchema} from "~/lib/utils/zod";
+import {createBoardSchema, deleteBoardSchema, updateBoardSchema} from "~/lib/types/schemas";
+import {tryNotFound} from "~/lib/utils/try-not-found";
+import {z} from "zod";
 
 
 export const getBoards = createServerFn({ method: "GET" })
@@ -21,7 +22,7 @@ export const getBoards = createServerFn({ method: "GET" })
 
 export const getBoard = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .inputValidator(z.object({ boardId: z.number() }))
+    .inputValidator((data) => tryNotFound(data, z.object({ boardId: z.number() })))
     .handler(async ({ data: { boardId }, context: { currentUser } }) => {
         const boardData = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, boardId), eq(s.boards.userId, currentUser.id)),
