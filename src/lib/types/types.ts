@@ -7,8 +7,8 @@ export const CONTENT_TYPES = {
 };
 
 
+export type CardType = BoardType["cards"][number];
+export type CardLabel = CardType["labels"][number];
+export type ColumnWithCards = BoardType["columns"][number] & { cards: BoardType["cards"] };
 export type BoardsType = Awaited<ReturnType<NonNullable<typeof boardsListOptions["queryFn"]>>>
 export type BoardType = Awaited<ReturnType<NonNullable<ReturnType<typeof boardDetailsOptions>["queryFn"]>>>;
-export type ColumnWithCards = BoardType["columns"][0] & { cards: BoardType["cards"] };
-export type CardType = BoardType["cards"][0];
-export type CardLabel = CardType["labels"][number];

@@ -3,6 +3,7 @@ import authClient from "~/lib/utils/auth-client";
 import {ColumnWithCards} from "~/lib/types/types";
 import {Button} from "~/lib/client/components/ui/button";
 import {Column} from "~/lib/client/components/board/Column";
+import {useDragScroll} from "~/lib/client/hooks/use-drag-scroll";
 import {NewColumn} from "~/lib/client/components/board/NewColumn";
 import React, {useCallback, useMemo, useRef, useState} from "react";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
@@ -22,86 +23,18 @@ export const Route = createFileRoute("/_private/board/$boardId")({
 function BoardPage() {
     const router = useRouter();
     const navigate = useNavigate();
-    const startX = useRef(0);
     const queryClient = useQueryClient();
     const { boardId } = Route.useParams();
-    const isDown = useRef(false);
-    const scrollLeft = useRef(0);
     const newColumnAddedRef = useRef(false);
     const boardNameEditState = useState(false);
     const updateBoardMutation = useUpdateBoardMutation();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const boardData = useSuspenseQuery(boardDetailsOptions(boardId)).data;
+    const dragScroll = useDragScroll(scrollContainerRef);
 
-    const handleMouseUp = () => {
-        isDown.current = false;
-        scrollContainerRef.current?.classList.remove("cursor-grabbing");
-    };
-
-    const handleMouseLeave = () => {
-        isDown.current = false;
-        scrollContainerRef.current?.classList.remove("cursor-grabbing");
-    };
-
-    const handleMouseDown = (ev: React.MouseEvent<HTMLDivElement>) => {
-        const target = ev.target as HTMLElement;
-
-        const interactiveSelector = '[draggable="true"], button, a, input, [role="menuitem"]';
-        if (target.closest(interactiveSelector)) {
-            return;
-        }
-
-        const board = scrollContainerRef.current;
-        if (!board) return;
-
-        isDown.current = true;
-        board.classList.add("cursor-grabbing");
-        startX.current = ev.pageX - board.offsetLeft;
-        scrollLeft.current = board.scrollLeft;
-    };
-
-    const handleMouseMove = (ev: React.MouseEvent<HTMLDivElement>) => {
-        if (!isDown.current) return;
-        ev.preventDefault();
-
-        const board = scrollContainerRef.current;
-        if (!board) return;
-
-        const x = ev.pageX - board.offsetLeft;
-        const walk = (x - startX.current);
-        board.scrollLeft = scrollLeft.current - walk;
-    };
-
-    const onChangeBoardNameHandler = (newName: string) => {
+    const changeBoardNameHandler = (newName: string) => {
         updateBoardMutation.mutate({ data: { id: boardData.id, name: newName } });
-    }
-
-    const columnRef = useCallback((_node: HTMLElement | null) => {
-        if (scrollContainerRef.current && newColumnAddedRef.current) {
-            newColumnAddedRef.current = false;
-            scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
-        }
-    }, []);
-
-    const cardsMapById = useMemo(() => {
-        return new Map(boardData.cards.map((card) => [card.id, card]));
-    }, [boardData.cards])
-
-    const columns = useMemo(() => {
-        const columnsMap = new Map<number, ColumnWithCards>();
-
-        for (const column of [...boardData.columns]) {
-            columnsMap.set(column.id, { ...column, cards: [] });
-        }
-
-        for (const card of cardsMapById.values()) {
-            const columnId = card.columnId;
-            const column = columnsMap.get(columnId);
-            column?.cards.push(card);
-        }
-
-        return [...columnsMap.values()].sort((a, b) => a.order - b.order)
-    }, [boardData.columns, cardsMapById])
+    };
 
     const handleLogout = async () => {
         await authClient.signOut();
@@ -111,9 +44,41 @@ function BoardPage() {
         queryClient.removeQueries();
     }
 
+    const scrollToEnd = useCallback(() => {
+        if (!scrollContainerRef.current) return;
+        scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+    }, []);
+
+    const columnRef = useCallback(() => {
+        if (!scrollContainerRef.current || !newColumnAddedRef.current) return;
+
+        scrollToEnd();
+        newColumnAddedRef.current = false;
+    }, [scrollToEnd]);
+
+    const cardsMapById = useMemo(() => {
+        return new Map(boardData.cards.map((card) => [card.id, card]));
+    }, [boardData.cards]);
+
+    const columns = useMemo(() => {
+        const columnsMap = new Map<number, ColumnWithCards>();
+
+        for (const column of [...boardData.columns]) {
+            columnsMap.set(column.id, { ...column, cards: [] });
+        }
+
+        for (const card of cardsMapById.values()) {
+            const column = columnsMap.get(card.columnId);
+            column?.cards.push(card);
+        }
+
+        return [...columnsMap.values()].sort((a, b) => a.order - b.order);
+    }, [boardData.columns, cardsMapById]);
+
     return (
         <div className="flex flex-col h-screen">
             <title>{`${boardData.name} - Tresso`}</title>
+
             <header className="flex items-center justify-between p-4 border-b  backdrop-blur-sm flex-shrink-0">
                 <div className="flex items-center gap-4">
                     <Button size="sm" variant="ghost" asChild={true}>
@@ -126,7 +91,7 @@ function BoardPage() {
                             fieldName="name"
                             buttonClass="text-2xl"
                             editState={boardNameEditState}
-                            onChange={onChangeBoardNameHandler}
+                            onChange={changeBoardNameHandler}
                             inputClass="text-2xl font-medium rounded-md py-0.5 px-4 focus:outline-none focus:ring-2 focus:ring-gray-800"
                             value={(updateBoardMutation.isPending && updateBoardMutation.variables.data.name) ?
                                 updateBoardMutation.variables.data.name : boardData.name}
@@ -134,33 +99,25 @@ function BoardPage() {
                     </h1>
                 </div>
                 <Button size="sm" variant="ghost" onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2"/>
-                    Logout
+                    <LogOut className="h-4 w-4 mr-2"/> Logout
                 </Button>
             </header>
 
             <div ref={scrollContainerRef} className="flex-grow min-h-0 flex flex-col overflow-x-auto">
-                <div
-                    onMouseUp={handleMouseUp}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                    className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-6 w-fit"
-                >
-                    {columns.map((col, idx) => {
-                        return (
-                            <Column
-                                col={col}
-                                key={col.id}
-                                ref={columnRef}
-                                previousOrder={columns[idx - 1] ? columns[idx - 1].order : 0}
-                                nextOrder={columns[idx + 1] ? columns[idx + 1].order : col.order + 1}
-                            />
-                        )
-                    })}
+                <div {...dragScroll} className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-6 w-fit">
+                    {columns.map((col, idx) =>
+                        <Column
+                            col={col}
+                            key={col.id}
+                            ref={columnRef}
+                            previousOrder={columns[idx - 1] ? columns[idx - 1].order : 0}
+                            nextOrder={columns[idx + 1] ? columns[idx + 1].order : col.order + 1}
+                        />
+                    )}
                     <NewColumn
                         boardId={boardData.id}
-                        editInitially={boardData.columns.length === 0}
+                        onExpand={scrollToEnd}
+                        editInitially={columns.length === 0}
                         onNewColumnAdded={() => (newColumnAddedRef.current = true)}
                     />
                     <div className="w-8 h-1"/>

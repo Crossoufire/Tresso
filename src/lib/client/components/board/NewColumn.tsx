@@ -1,25 +1,26 @@
 import {toast} from "sonner";
 import {Loader2, Plus} from "lucide-react";
+import React, {useRef, useState} from "react";
 import {Input} from "~/lib/client/components/ui/input";
 import {Button} from "~/lib/client/components/ui/button";
-import React, {useRef, useState} from "react";
 import {useCreateColumnMutation} from "~/lib/client/react-query/mutations";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 
 
 interface NewColumProps {
     boardId: number;
+    onExpand: () => void;
     editInitially: boolean;
     onNewColumnAdded: () => void;
 }
 
 
-export function NewColumn({ boardId, editInitially, onNewColumnAdded }: NewColumProps) {
+export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }: NewColumProps) {
     const createColMutation = useCreateColumnMutation();
     const [editing, setEditing] = useState(editInitially);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const onSubmitHandler = (ev: React.FormEvent<HTMLFormElement>) => {
+    const onSubmitHandler = (ev: React.FormEvent) => {
         ev.preventDefault();
         if (!inputRef.current) return;
 
@@ -31,11 +32,16 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded }: NewColum
         onNewColumnAdded();
     };
 
+    const cardRef = (ev: HTMLDivElement) => {
+        if (!ev) return;
+        onExpand();
+    }
+
     return (
         <>
             {editing ?
                 <form onSubmit={onSubmitHandler}>
-                    <Card className="min-w-72 ml-3">
+                    <Card className="min-w-72 ml-3" ref={cardRef}>
                         <CardHeader>
                             <CardTitle>Add Column</CardTitle>
                             <CardDescription>Add a new column to this board</CardDescription>
