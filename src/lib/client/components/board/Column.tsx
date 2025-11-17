@@ -1,14 +1,13 @@
 import {toast} from "sonner";
 import {flushSync} from "react-dom";
 import {cn} from "~/lib/utils/utils";
-import {twMerge} from "tailwind-merge";
 import {MoreHorizontal, Plus} from "lucide-react";
 import {Card} from "~/lib/client/components/board/Card";
 import {Button} from "~/lib/client/components/ui/button";
 import {NewCard} from "~/lib/client/components/board/NewCard";
-import {ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
-import React, {useCallback, useMemo, useRef, useState} from "react";
 import {EditableText} from "~/lib/client/components/board/EditableText";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {CardTransferType, ColTransferType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteColumnMutation, useUpdateCardOrderMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
@@ -21,7 +20,8 @@ interface ColumnProps {
 }
 
 
-export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
+export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
+    const didMountRef = useRef(false);
     const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
     const deleteColumnMutation = useDeleteColumnMutation();
@@ -31,29 +31,24 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
     const updateCardOrderMutation = useUpdateCardOrderMutation(col.boardId);
     const [acceptColumnDrop, setAcceptColumnDrop] = useState<"none" | "left" | "right">("none");
 
+    useEffect(() => {
+        didMountRef.current = true;
+    }, []);
+
     const cardRef = useCallback((node: HTMLElement | null) => {
-        node?.scrollIntoView({ block: "nearest" });
+        if (!didMountRef.current || !node) return;
+        node.scrollIntoView({ block: "center" });
     }, []);
 
     const sortedCards = useMemo(() => {
         return [...col.cards].sort((a, b) => a.order - b.order);
     }, [col.cards]);
 
-    const onDragOverHandler = (ev: React.DragEvent) => {
-        if (ev.dataTransfer.types.includes(CONTENT_TYPES.column)) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            const rect = ev.currentTarget.getBoundingClientRect();
-            const midpoint = (rect.left + rect.right) / 2;
-            setAcceptColumnDrop(ev.clientX <= midpoint ? 'left' : 'right');
-        }
-    }
-
     const onDropHandler = (ev: React.DragEvent) => {
-        const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.column) || "null");
+        const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.column) || "null") as ColTransferType;
         if (!transfer) return;
 
-        const droppedOrder = acceptColumnDrop === "left" ? previousOrder : nextOrder;
+        const droppedOrder = (acceptColumnDrop === "left") ? previousOrder : nextOrder;
         const moveOrder = (droppedOrder + col.order) / 2;
 
         updateColumnMutation.mutate({
@@ -67,16 +62,28 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
         setAcceptColumnDrop("none");
     }
 
-    const onDragStartHandler = (ev: React.DragEvent) => {
-        ev.dataTransfer.effectAllowed = "move";
-        ev.dataTransfer.setData(CONTENT_TYPES.column, JSON.stringify({ id: col.id, name: col.name }));
+    const onDragOverHandler = (ev: React.DragEvent) => {
+        if (!ev.dataTransfer.types.includes(CONTENT_TYPES.column)) return;
+
+        ev.preventDefault();
+        ev.stopPropagation();
+        const rect = ev.currentTarget.getBoundingClientRect();
+        const midpoint = (rect.left + rect.right) / 2;
+        setAcceptColumnDrop(ev.clientX <= midpoint ? "left" : "right");
     }
 
-    const onChangeTextHandler = (value: string) => {
+    const onDragStartHandler = (ev: React.DragEvent) => {
+        ev.dataTransfer.effectAllowed = "move";
+
+        const data: ColTransferType = { id: col.id, name: col.name };
+        ev.dataTransfer.setData(CONTENT_TYPES.column, JSON.stringify(data));
+    }
+
+    const onChangeColName = (newName: string) => {
         updateColumnMutation.mutate({
             data: {
                 id: col.id,
-                name: value,
+                name: newName,
                 boardId: col.boardId,
             }
         })
@@ -101,21 +108,21 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
                 setAcceptCardDrop(true);
             }
         },
-        onDragLeave: () => {
-            setAcceptCardDrop(false);
-        },
         onDrop: (ev: React.DragEvent) => {
-            const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null");
+            const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null") as CardTransferType;
             if (!transfer) return;
 
             updateCardOrderMutation.mutate({
                 data: {
                     id: transfer.id,
                     columnId: col.id,
-                    order: (sortedCards[sortedCards.length - 1]?.order ?? 0) + 1,
+                    order: sortedCards[sortedCards.length - 1].order + 1,
                 },
             })
 
+            setAcceptCardDrop(false);
+        },
+        onDragLeave: () => {
             setAcceptCardDrop(false);
         },
     };
@@ -126,7 +133,7 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
             onDrop={onDropHandler}
             onDragOver={onDragOverHandler}
             onDragLeave={() => setAcceptColumnDrop("none")}
-            className={twMerge("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-[2px] last:mr-0 " +
+            className={cn("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-[2px] last:mr-0 " +
                 "px-2 flex-shrink-0 flex flex-col max-h-full",
                 acceptColumnDrop === "left" ? "border-l-red-800 border-r-transparent" :
                     acceptColumnDrop === "right" ? "border-r-red-800 border-l-transparent" : "",
@@ -144,8 +151,8 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
                     <EditableText
                         fieldName="name"
                         buttonClass="px-2"
+                        onChange={onChangeColName}
                         editState={colNameEditState}
-                        onChange={onChangeTextHandler}
                         inputClass="rounded-md py-2 px-2 font-medium text-sm"
                         value={(updateColumnMutation.isPending && updateColumnMutation.variables.data.name)
                             ? updateColumnMutation.variables.data.name : col.name
@@ -201,5 +208,5 @@ export const Column = ({ ref, col, nextOrder, previousOrder }: ColumnProps) => {
                 }
             </div>
         </div>
-    )
+    );
 }

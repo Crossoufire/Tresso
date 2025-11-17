@@ -64,8 +64,8 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                         <EditableText
                             fieldName="title"
                             editState={titleEditState}
-                            buttonClass="text-lg px-2 py-1 h-full text-left"
                             inputClass="text-lg px-2 py-2 w-full rounded-md"
+                            buttonClass="text-lg px-2 py-1 h-full text-left"
                             onChange={(value) => updateCardTitleHandler(value)}
                             value={(updateCardTitleMutation.isPending && updateCardTitleMutation.variables.data.title) ?
                                 updateCardTitleMutation.variables.data.title : card.title

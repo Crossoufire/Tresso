@@ -72,7 +72,9 @@ export const useUpdateColumnMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    columns: oldData.columns.map(col => col.id === variables.data.id ? { ...col, ...variables.data } : col),
+                    columns: oldData.columns.map(col =>
+                        col.id === variables.data.id ? { ...col, ...variables.data } : col
+                    ),
                 };
             })
         },

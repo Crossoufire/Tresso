@@ -1,9 +1,9 @@
 import {toast} from "sonner";
-import {DragEvent, Ref, useState} from "react";
+import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
-import {CardType, CONTENT_TYPES} from "~/lib/types/types";
 import {MessageSquareCode, MoreVertical} from "lucide-react";
+import {CardTransferType, CardType, CONTENT_TYPES} from "~/lib/types/types";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
 import {useDeleteCardMutation, useUpdateCardOrderMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
@@ -24,20 +24,10 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">("none");
 
-    const onDragOverHandler = (ev: DragEvent) => {
-        if (ev.dataTransfer.types.includes(CONTENT_TYPES.card)) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            const rect = ev.currentTarget.getBoundingClientRect();
-            const midpoint = (rect.top + rect.bottom) / 2;
-            setAcceptDrop(ev.clientY <= midpoint ? "top" : "bottom");
-        }
-    };
-
-    const onDropHandler = (ev: DragEvent) => {
+    const onDropHandler = (ev: React.DragEvent) => {
         ev.stopPropagation();
 
-        const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null");
+        const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null") as CardTransferType;
         if (!transfer) return;
 
         const droppedOrder = (acceptDrop === "top") ? previousOrder : nextOrder;
@@ -54,9 +44,21 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
         setAcceptDrop("none");
     };
 
-    const onDragStartHandler = (ev: DragEvent) => {
+    const onDragOverHandler = (ev: React.DragEvent) => {
+        if (!ev.dataTransfer.types.includes(CONTENT_TYPES.card)) return;
+
+        ev.preventDefault();
+        ev.stopPropagation();
+        const rect = ev.currentTarget.getBoundingClientRect();
+        const midpoint = (rect.top + rect.bottom) / 2;
+        setAcceptDrop(ev.clientY <= midpoint ? "top" : "bottom");
+    };
+
+    const onDragStartHandler = (ev: React.DragEvent) => {
         ev.dataTransfer.effectAllowed = "move";
-        ev.dataTransfer.setData(CONTENT_TYPES.card, JSON.stringify({ id: card.id, title: card.title }));
+
+        const data: CardTransferType = { id: card.id, title: card.title };
+        ev.dataTransfer.setData(CONTENT_TYPES.card, JSON.stringify(data));
         ev.stopPropagation();
     };
 

@@ -1,7 +1,7 @@
 import {Plus} from "lucide-react";
-import {Button} from "~/lib/client/components/ui/button";
-import {CardLabel, CardType} from "~/lib/types/types";
 import React, {useReducer, useState} from "react";
+import {CardLabel, CardType} from "~/lib/types/types";
+import {Button} from "~/lib/client/components/ui/button";
 import {LabelFormView} from "~/lib/client/components/edit-card/LabelFormView";
 import {LabelSelectionView} from "~/lib/client/components/edit-card/LabelSelectionView";
 import {Popover, PopoverContent, PopoverTrigger,} from "~/lib/client/components/ui/popover";
@@ -9,6 +9,7 @@ import {useAddLabelToCardMutation, useCreateLabelMutation, useDeleteLabelMutatio
 
 
 type Action = { type: "START_CREATE" } | { type: "START_EDIT"; payload: CardLabel } | { type: "RESET" };
+
 type State = {
     editingLabel: CardLabel | null;
     mode: "select" | "create" | "edit";

@@ -2,9 +2,21 @@ import {boardDetailsOptions, boardsListOptions} from "~/lib/client/react-query/q
 
 
 export const CONTENT_TYPES = {
-    card: "application/app-card",
-    column: "application/app-column",
+    card: "board-card",
+    column: "board-column",
 };
+
+
+export type ColTransferType = {
+    id: number;
+    name: string;
+} | null;
+
+
+export type CardTransferType = {
+    id: number;
+    title: string;
+} | null;
 
 
 export type CardType = BoardType["cards"][number];
