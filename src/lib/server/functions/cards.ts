@@ -17,27 +17,30 @@ export const createCard = createServerFn({ method: "POST" })
             with: {
                 columns: {
                     where: eq(s.columns.id, data.columnId),
-                }
-            }
+                },
+            },
         });
 
         if (!targetBoard || targetBoard.columns.length === 0) {
             throw notFound();
         }
 
-        const lastCard = await db.select({ value: max(s.cards.order) })
+        const lastCard = await db
+            .select({ value: max(s.cards.order) })
             .from(s.cards)
             .where(eq(s.cards.columnId, data.columnId));
 
         const newOrder = (lastCard[0]?.value ?? -1) + 1;
 
-        const [newCard] = await db.insert(s.cards).values({
-            order: newOrder,
-            title: data.title,
-            boardId: data.boardId,
-            columnId: data.columnId,
-            content: data.content || null,
-        }).returning();
+        const [newCard] = await db
+            .insert(s.cards)
+            .values({
+                order: newOrder,
+                title: data.title,
+                boardId: data.boardId,
+                columnId: data.columnId,
+                content: data.content || null,
+            }).returning();
 
         return { ...newCard, labels: [] };
     });
@@ -49,7 +52,11 @@ export const updateCardOrder = createServerFn({ method: "POST" })
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
-            with: { board: { columns: { userId: true } } }
+            with: {
+                board: {
+                    columns: { userId: true },
+                },
+            },
         });
 
         if (!cardData || cardData.board.userId !== currentUser.id) {
@@ -72,7 +79,11 @@ export const deleteCard = createServerFn({ method: "POST" })
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
-            with: { board: { columns: { userId: true } } }
+            with: {
+                board: {
+                    columns: { userId: true },
+                },
+            },
         });
 
         if (!cardData || cardData.board.userId !== currentUser.id) {
@@ -91,7 +102,11 @@ export const updateCardTitle = createServerFn({ method: "POST" })
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
-            with: { board: { columns: { userId: true } } }
+            with: {
+                board: {
+                    columns: { userId: true },
+                },
+            },
         });
 
         if (!cardData || cardData.board.userId !== currentUser.id) {
@@ -111,7 +126,11 @@ export const updateCardContent = createServerFn({ method: "POST" })
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
-            with: { board: { columns: { userId: true } } }
+            with: {
+                board: {
+                    columns: { userId: true },
+                },
+            },
         });
 
         if (!cardData || cardData.board.userId !== currentUser.id) {
@@ -120,7 +139,7 @@ export const updateCardContent = createServerFn({ method: "POST" })
 
         await db
             .update(s.cards)
-            .set({ title: data.content })
+            .set({ content: data.content })
             .where(eq(s.cards.id, data.id));
     });
 
@@ -131,7 +150,11 @@ export const addLabelToCard = createServerFn({ method: "POST" })
     .handler(async ({ data: { cardId, labelId }, context: { currentUser } }) => {
         const card = await db.query.cards.findFirst({
             where: eq(s.cards.id, cardId),
-            with: { board: { columns: { userId: true } } },
+            with: {
+                board: {
+                    columns: { userId: true },
+                },
+            },
         });
 
         if (!card || card.board.userId !== currentUser.id) {
@@ -158,7 +181,11 @@ export const removeLabelFromCard = createServerFn({ method: "POST" })
     .handler(async ({ data: { cardId, labelId }, context: { currentUser } }) => {
         const card = await db.query.cards.findFirst({
             where: eq(s.cards.id, cardId),
-            with: { board: { columns: { userId: true } } },
+            with: {
+                board: {
+                    columns: { userId: true },
+                },
+            },
         });
 
         if (!card || card.board.userId !== currentUser.id) {

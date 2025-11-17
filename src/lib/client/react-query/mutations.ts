@@ -170,7 +170,9 @@ export const useUpdateCardContentMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.id ? { ...card, ...variables.data } : card),
+                    cards: oldData.cards.map((card) =>
+                        card.id === variables.data.id ? { ...card, ...variables.data } : card
+                    ),
                 }
             })
         },

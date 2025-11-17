@@ -1,7 +1,7 @@
 import {toast} from "sonner";
+import {DragEvent, Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
-import React, {DragEvent, useState} from "react";
 import {CardType, CONTENT_TYPES} from "~/lib/types/types";
 import {MessageSquareCode, MoreVertical} from "lucide-react";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
@@ -14,7 +14,7 @@ interface CardProps {
     columnId: number;
     nextOrder: number;
     previousOrder: number;
-    ref: React.Ref<HTMLLIElement>;
+    ref: Ref<HTMLLIElement>;
 }
 
 
@@ -24,7 +24,7 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">("none");
 
-    const onDragOverHandler = (ev: DragEvent<HTMLLIElement>) => {
+    const onDragOverHandler = (ev: DragEvent) => {
         if (ev.dataTransfer.types.includes(CONTENT_TYPES.card)) {
             ev.preventDefault();
             ev.stopPropagation();
@@ -34,7 +34,7 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
         }
     };
 
-    const onDropHandler = (ev: DragEvent<HTMLLIElement>) => {
+    const onDropHandler = (ev: DragEvent) => {
         ev.stopPropagation();
 
         const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null");
@@ -54,18 +54,18 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
         setAcceptDrop("none");
     };
 
-    const onDragStartHandler = (ev: DragEvent<HTMLDivElement>) => {
+    const onDragStartHandler = (ev: DragEvent) => {
         ev.dataTransfer.effectAllowed = "move";
         ev.dataTransfer.setData(CONTENT_TYPES.card, JSON.stringify({ id: card.id, title: card.title }));
         ev.stopPropagation();
     };
 
-    const openEditDialog = (ev: any) => {
+    const openEditDialog = (ev: React.MouseEvent) => {
         ev.stopPropagation();
         setIsEditDialogOpen(true);
     };
 
-    const onDeleteHandler = (ev: any) => {
+    const onDeleteHandler = (ev: React.MouseEvent) => {
         ev.stopPropagation();
         if (!window.confirm("Are you sure to delete this card?")) return;
 

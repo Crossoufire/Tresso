@@ -84,11 +84,20 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                     onChange={(ev) => setNewContent(ev.target.value)}
                                 />
                                 <div className="flex gap-2 mt-2">
-                                    <Button variant="outline" onClick={() => setIsEditingContent(false)} disabled={updateCardContentMutation.isPending}>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsEditingContent(false)}
+                                        disabled={updateCardContentMutation.isPending}
+                                    >
                                         Cancel
                                     </Button>
-                                    <Button onClick={() => updateCardContentHandler(newContent)} disabled={updateCardContentMutation.isPending}>
-                                        {updateCardContentMutation.isPending && <LoaderCircle className="animate-spin"/>} Save
+                                    <Button
+                                        disabled={updateCardContentMutation.isPending}
+                                        onClick={() => updateCardContentHandler(newContent)}
+                                    >
+                                        {updateCardContentMutation.isPending &&
+                                            <LoaderCircle className="animate-spin"/>
+                                        } Save
                                     </Button>
                                 </div>
                             </div>
