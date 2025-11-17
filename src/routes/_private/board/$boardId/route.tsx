@@ -83,7 +83,7 @@ function BoardPage() {
                 <div className="flex items-center gap-4">
                     <Button size="sm" variant="ghost" asChild={true}>
                         <Link to="/boards">
-                            <ArrowLeft className="h-4 w-4 mr-1"/> All Boards
+                            <ArrowLeft className="size-4 mr-1"/> All Boards
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold">
@@ -99,12 +99,12 @@ function BoardPage() {
                     </h1>
                 </div>
                 <Button size="sm" variant="ghost" onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2"/> Logout
+                    <LogOut className="size-4 mr-2"/> Logout
                 </Button>
             </header>
 
             <div ref={scrollContainerRef} className="flex-grow min-h-0 flex flex-col overflow-x-auto">
-                <div {...dragScroll} className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-6 w-fit">
+                <div {...dragScroll} className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-4 w-fit">
                     {columns.map((col, idx) =>
                         <Column
                             col={col}
