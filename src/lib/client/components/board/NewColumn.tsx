@@ -20,6 +20,11 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
     const [editing, setEditing] = useState(editInitially);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const cardRef = (ev: HTMLDivElement) => {
+        if (!ev) return;
+        onExpand();
+    }
+
     const onSubmitHandler = (ev: React.FormEvent) => {
         ev.preventDefault();
         if (!inputRef.current) return;
@@ -31,11 +36,6 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
         inputRef.current.value = "";
         onNewColumnAdded();
     };
-
-    const cardRef = (ev: HTMLDivElement) => {
-        if (!ev) return;
-        onExpand();
-    }
 
     return (
         <>

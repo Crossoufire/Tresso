@@ -5,23 +5,30 @@ export const useDragScroll = (containerRef: RefObject<HTMLDivElement | null>) =>
     const drag = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
 
     const onMouseDown = (ev: React.MouseEvent) => {
-        const el = containerRef.current;
-        if (!el) return;
+        const target = ev.target as HTMLElement;
+
+        const interactiveSelector = '[draggable="true"], button, a, input, [role="menuitem"]';
+        if (target.closest(interactiveSelector)) {
+            return;
+        }
+
+        const container = containerRef.current;
+        if (!container) return;
 
         drag.current.isDown = true;
-        drag.current.scrollLeft = el.scrollLeft;
-        el.classList.add("cursor-grabbing");
-        drag.current.startX = ev.pageX - el.offsetLeft;
+        drag.current.scrollLeft = container.scrollLeft;
+        container.classList.add("cursor-grabbing");
+        drag.current.startX = ev.pageX - container.offsetLeft;
     };
 
     const onMouseMove = (ev: React.MouseEvent) => {
         if (!drag.current.isDown) return;
+        ev.preventDefault();
 
-        const el = containerRef.current;
-        if (!el) return;
-
-        const x = ev.pageX - el.offsetLeft;
-        el.scrollLeft = drag.current.scrollLeft - (x - drag.current.startX);
+        const container = containerRef.current;
+        if (!container) return;
+        
+        container.scrollLeft = drag.current.scrollLeft - ((ev.pageX - container.offsetLeft) - drag.current.startX);
     };
 
     const endDrag = () => {
