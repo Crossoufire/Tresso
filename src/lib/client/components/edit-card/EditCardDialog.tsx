@@ -120,14 +120,14 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                         No labels assigned.
                                     </span>
                                     :
-                                    card.labels.map((label) =>
+                                    card.labels.map((data) =>
                                         <Badge
-                                            key={label.id}
+                                            key={data.label.id}
                                             className="flex items-center gap-2"
-                                            style={{ backgroundColor: label.color, color: "black" }}
+                                            style={{ backgroundColor: data.label.color, color: "black" }}
                                         >
-                                            {label.name}
-                                            <div onClick={() => removeSelectedLabel(label.id)}>
+                                            {data.label.name}
+                                            <div onClick={() => removeSelectedLabel(data.label.id)}>
                                                 <X className="size-3 cursor-pointer hover:bg-black/20 rounded"/>
                                             </div>
                                         </Badge>

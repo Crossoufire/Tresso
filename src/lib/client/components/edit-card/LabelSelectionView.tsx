@@ -1,7 +1,7 @@
 import React from "react";
 import {useQuery} from "@tanstack/react-query";
 import {Edit2, Plus, Trash2} from "lucide-react";
-import {CardLabel, CardType} from "~/lib/types/types";
+import {BoardLabel, CardType} from "~/lib/types/types";
 import {Label} from "~/lib/client/components/ui/label";
 import {Button} from "~/lib/client/components/ui/button";
 import {Checkbox} from "~/lib/client/components/ui/checkbox";
@@ -15,7 +15,7 @@ interface LabelSelectionViewProps {
     isPending: boolean;
     onStartCreate: () => void;
     onDelete: (labelId: number) => void;
-    onStartEdit: (label: CardLabel) => void;
+    onStartEdit: (label: BoardLabel) => void;
 }
 
 
@@ -28,7 +28,7 @@ export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete,
         select: (data) => data.labels,
     });
 
-    const toggleLabelCardHandler = (checked: string | boolean, label: CardLabel) => {
+    const toggleLabelCardHandler = (checked: string | boolean, label: BoardLabel) => {
         if (checked) {
             addLabelToCardMutation.mutate({ data: { cardId: card.id, labelId: label.id } });
         }
@@ -50,13 +50,13 @@ export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete,
                     {(boardLabels && boardLabels.length > 0) ?
                         boardLabels.map((label) => {
                             const checkboxId = `label-checkbox-${label.id}`;
-                            
+
                             return (
                                 <div key={label.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
                                     <div className="flex items-center gap-2 flex-1">
                                         <Checkbox
                                             id={checkboxId}
-                                            checked={card.labels.some((l) => l.id === label.id)}
+                                            checked={card.labels.some((l) => l.label.id === label.id)}
                                             onCheckedChange={(value) => toggleLabelCardHandler(value, label)}
                                         />
                                         <Label htmlFor={checkboxId} className="flex-1 font-normal cursor-pointer select-none">

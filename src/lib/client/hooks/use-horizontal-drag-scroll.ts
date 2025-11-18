@@ -1,7 +1,7 @@
 import React, {RefObject, useRef} from "react";
 
 
-export const useDragScroll = (containerRef: RefObject<HTMLDivElement | null>) => {
+export const useHorizontalDragScroll = (containerRef: RefObject<HTMLDivElement | null>) => {
     const drag = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
 
     const onMouseDown = (ev: React.MouseEvent) => {
@@ -27,7 +27,7 @@ export const useDragScroll = (containerRef: RefObject<HTMLDivElement | null>) =>
 
         const container = containerRef.current;
         if (!container) return;
-        
+
         container.scrollLeft = drag.current.scrollLeft - ((ev.pageX - container.offsetLeft) - drag.current.startX);
     };
 

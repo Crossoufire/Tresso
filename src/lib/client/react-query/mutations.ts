@@ -56,7 +56,7 @@ export const useCreateColumnMutation = () => {
                 return { ...oldData, columns: [...oldData.columns, data] };
             });
         }
-    })
+    });
 };
 
 
@@ -66,15 +66,17 @@ export const useUpdateColumnMutation = (boardId: number) => {
     return useMutation({
         mutationFn: updateColumn,
         onMutate: async (variables) => {
+            if (!variables.data.name) return;
+
             await queryClient.cancelQueries();
 
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    columns: oldData.columns.map(col =>
+                    columns: [...oldData.columns.map((col) =>
                         col.id === variables.data.id ? { ...col, ...variables.data } : col
-                    ),
+                    )],
                 };
             })
         },
@@ -95,7 +97,6 @@ export const useDeleteColumnMutation = () => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.filter((card) => card.columnId !== variables.data.id),
                     columns: oldData.columns.filter((column) => column.id !== variables.data.id),
                 }
             });
@@ -114,7 +115,15 @@ export const useCreateCardMutation = (boardId: number) => {
         onSuccess: (data) => {
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
-                return { ...oldData, cards: [...oldData.cards, data] }
+                return {
+                    ...oldData,
+                    columns: [...oldData.columns.map((col) => {
+                        if (col.id === data.columnId) {
+                            return { ...col, cards: [...col.cards, data] };
+                        }
+                        return col;
+                    })]
+                }
             });
         }
     })

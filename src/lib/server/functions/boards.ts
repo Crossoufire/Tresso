@@ -24,29 +24,29 @@ export const getBoard = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
     .inputValidator((data) => tryNotFound(data, z.object({ boardId: z.number() })))
     .handler(async ({ data: { boardId }, context: { currentUser } }) => {
-        const boardData = await db.query.boards.findFirst({
+        const board = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, boardId), eq(s.boards.userId, currentUser.id)),
             with: {
                 labels: { orderBy: asc(s.labels.name) },
-                columns: { orderBy: asc(s.columns.order) },
-                cards: {
-                    orderBy: asc(s.cards.order),
-                    with: { labels: { with: { label: true } } },
+                columns: {
+                    orderBy: asc(s.columns.order),
+                    with: {
+                        cards: {
+                            orderBy: asc(s.cards.order),
+                            with: {
+                                labels: {
+                                    with: { label: true },
+                                },
+                            },
+                        },
+                    },
                 },
             },
         });
 
-        if (!boardData) {
+        if (!board) {
             throw notFound();
         }
-
-        const board = {
-            ...boardData,
-            cards: boardData.cards.map(card => ({
-                ...card,
-                labels: card.labels.map((cardToLabel) => cardToLabel.label),
-            })),
-        };
 
         return board;
     });

@@ -1,26 +1,28 @@
 import {toast} from "sonner";
 import {flushSync} from "react-dom";
 import {cn} from "~/lib/utils/utils";
+import {CSS} from "@dnd-kit/utilities";
+import {useSortable} from "@dnd-kit/sortable";
 import {MoreHorizontal, Plus} from "lucide-react";
 import {Card} from "~/lib/client/components/board/Card";
 import {Button} from "~/lib/client/components/ui/button";
 import {NewCard} from "~/lib/client/components/board/NewCard";
 import {EditableText} from "~/lib/client/components/board/EditableText";
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {CardTransferType, ColTransferType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
+import {CardTransferType, ColTransferType, ColumnType, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteColumnMutation, useUpdateCardOrderMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
 interface ColumnProps {
+    col: ColumnType;
     nextOrder: number;
-    col: ColumnWithCards;
     previousOrder: number;
     ref: React.Ref<HTMLDivElement>;
 }
 
 
-export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
+export const Column = ({ col, ref }: ColumnProps) => {
     const didMountRef = useRef(false);
     const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
@@ -29,11 +31,21 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
     const updateColumnMutation = useUpdateColumnMutation(col.boardId);
     const [acceptCardDrop, setAcceptCardDrop] = useState(false);
     const updateCardOrderMutation = useUpdateCardOrderMutation(col.boardId);
-    const [acceptColumnDrop, setAcceptColumnDrop] = useState<"none" | "left" | "right">("none");
+    const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+        id: col.id,
+        data: { type: "column", column: col },
+    });
 
     useEffect(() => {
         didMountRef.current = true;
     }, []);
+
+    const style = {
+        transition,
+        opacity: isDragging ? 0.6 : 1,
+        zIndex: isDragging ? 999 : undefined,
+        transform: CSS.Transform.toString(transform),
+    }
 
     const cardRef = useCallback((node: HTMLElement | null) => {
         if (!didMountRef.current || !node) return;
@@ -43,34 +55,6 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
     const sortedCards = useMemo(() => {
         return [...col.cards].sort((a, b) => a.order - b.order);
     }, [col.cards]);
-
-    const onDropHandler = (ev: React.DragEvent) => {
-        const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.column) || "null") as ColTransferType;
-        if (!transfer) return;
-
-        const droppedOrder = (acceptColumnDrop === "left") ? previousOrder : nextOrder;
-        const moveOrder = (droppedOrder + col.order) / 2;
-
-        updateColumnMutation.mutate({
-            data: {
-                id: transfer.id,
-                order: moveOrder,
-                boardId: col.boardId,
-            }
-        })
-
-        setAcceptColumnDrop("none");
-    }
-
-    const onDragOverHandler = (ev: React.DragEvent) => {
-        if (!ev.dataTransfer.types.includes(CONTENT_TYPES.column)) return;
-
-        ev.preventDefault();
-        ev.stopPropagation();
-        const rect = ev.currentTarget.getBoundingClientRect();
-        const midpoint = (rect.left + rect.right) / 2;
-        setAcceptColumnDrop(ev.clientX <= midpoint ? "left" : "right");
-    }
 
     const onDragStartHandler = (ev: React.DragEvent) => {
         ev.dataTransfer.effectAllowed = "move";
@@ -129,17 +113,16 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
 
     return (
         <div
-            ref={ref}
-            onDrop={onDropHandler}
-            onDragOver={onDragOverHandler}
-            onDragLeave={() => setAcceptColumnDrop("none")}
-            className={cn("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-[2px] last:mr-0 " +
-                "px-2 flex-shrink-0 flex flex-col max-h-full",
-                acceptColumnDrop === "left" ? "border-l-red-800 border-r-transparent" :
-                    acceptColumnDrop === "right" ? "border-r-red-800 border-l-transparent" : "",
-            )}
+            style={style}
+            ref={(node) => {
+                setNodeRef(node);
+                if (typeof ref === "function") ref(node);
+            }}
+            className="-mr-[2px] last:mr-0 px-2 flex-shrink-0 flex flex-col max-h-full"
         >
             <div
+                {...listeners}
+                {...attributes}
                 onDragStart={onDragStartHandler}
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !deleteColumnMutation.isPending}

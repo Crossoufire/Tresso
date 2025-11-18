@@ -1,5 +1,5 @@
 import {Loader2} from "lucide-react";
-import {CardLabel} from "~/lib/types/types";
+import {BoardLabel} from "~/lib/types/types";
 import React, {useEffect, useState} from "react";
 import {Label} from "~/lib/client/components/ui/label";
 import {Input} from "~/lib/client/components/ui/input";
@@ -13,7 +13,7 @@ interface LabelFormViewProps {
     onBack: () => void;
     isPending: boolean;
     mode: "create" | "edit";
-    initialLabel: CardLabel | null;
+    initialLabel: BoardLabel | null;
     onSubmit: (data: { name: string; color: string }) => void;
 }
 

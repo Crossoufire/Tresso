@@ -29,7 +29,7 @@ export const createColumn = createServerFn({ method: "POST" })
                 order: targetBoard.columns.length + 1,
             }).returning();
 
-        return createdCol;
+        return { ...createdCol, cards: [] };
     });
 
 

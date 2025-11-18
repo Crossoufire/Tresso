@@ -1,23 +1,25 @@
+import {ColumnType} from "~/lib/types/types";
 import {ArrowLeft, LogOut} from "lucide-react";
 import authClient from "~/lib/utils/auth-client";
-import {ColumnWithCards} from "~/lib/types/types";
 import {Button} from "~/lib/client/components/ui/button";
 import {Column} from "~/lib/client/components/board/Column";
-import {useDragScroll} from "~/lib/client/hooks/use-drag-scroll";
+import {arrayMove, SortableContext} from "@dnd-kit/sortable";
 import {NewColumn} from "~/lib/client/components/board/NewColumn";
-import React, {useCallback, useMemo, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {EditableText} from "~/lib/client/components/board/EditableText";
-import {useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
+import {useHorizontalDragScroll} from "~/lib/client/hooks/use-horizontal-drag-scroll";
 import {authOptions, boardDetailsOptions} from "~/lib/client/react-query/query-options";
+import {DndContext, DragEndEvent, PointerSensor, TouchSensor, useSensor, useSensors} from "@dnd-kit/core";
+import {useUpdateBoardMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
 
 
 export const Route = createFileRoute("/_private/board/$boardId")({
     params: { parse: ({ boardId }) => ({ boardId: Number(boardId) }) },
     loader: ({ context: { queryClient }, params: { boardId } }) => queryClient.ensureQueryData(boardDetailsOptions(boardId)),
     component: BoardPage,
-})
+});
 
 
 function BoardPage() {
@@ -28,9 +30,21 @@ function BoardPage() {
     const newColumnAddedRef = useRef(false);
     const boardNameEditState = useState(false);
     const updateBoardMutation = useUpdateBoardMutation();
+    const updateColumnMutation = useUpdateColumnMutation(boardId);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const boardData = useSuspenseQuery(boardDetailsOptions(boardId)).data;
-    const dragScroll = useDragScroll(scrollContainerRef);
+    const [columns, setColumns] = useState<ColumnType[]>(boardData.columns);
+    const horizontalDragScroll = useHorizontalDragScroll(scrollContainerRef);
+
+    const sensors = useSensors(
+        useSensor(TouchSensor, { activationConstraint: { distance: 10 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
+    );
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setColumns(boardData.columns);
+    }, [boardData.columns]);
 
     const changeBoardNameHandler = (newName: string) => {
         updateBoardMutation.mutate({ data: { id: boardData.id, name: newName } });
@@ -44,6 +58,36 @@ function BoardPage() {
         queryClient.removeQueries();
     }
 
+    const onDragEndHandler = (ev: DragEndEvent) => {
+        const { active, over } = ev;
+        if (!active.id || !over?.id || (over.id === active.id)) return;
+
+        setColumns((prev) => {
+            const overColIdx = columns.findIndex((col) => col.id === over.id);
+            const activeColIdx = columns.findIndex((col) => col.id === active.id);
+
+            const newColumns = arrayMove(prev, activeColIdx, overColIdx);
+
+            const prevNeig = newColumns[overColIdx - 1];
+            const nextNeig = newColumns[overColIdx + 1];
+
+            const newOrder = !prevNeig && !nextNeig ?
+                1024 : prevNeig ?
+                    nextNeig ? prevNeig.order + (nextNeig.order - prevNeig.order) / 2 :
+                        prevNeig.order + 1024 : nextNeig.order / 2;
+
+            updateColumnMutation.mutate({
+                data: {
+                    boardId,
+                    order: newOrder,
+                    id: Number(active.id),
+                },
+            });
+
+            return newColumns;
+        });
+    };
+
     const scrollToEnd = useCallback(() => {
         if (!scrollContainerRef.current) return;
         scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
@@ -55,25 +99,6 @@ function BoardPage() {
         scrollToEnd();
         newColumnAddedRef.current = false;
     }, [scrollToEnd]);
-
-    const cardsMapById = useMemo(() => {
-        return new Map(boardData.cards.map((card) => [card.id, card]));
-    }, [boardData.cards]);
-
-    const columns = useMemo(() => {
-        const columnsMap = new Map<number, ColumnWithCards>();
-
-        for (const column of [...boardData.columns]) {
-            columnsMap.set(column.id, { ...column, cards: [] });
-        }
-
-        for (const card of cardsMapById.values()) {
-            const column = columnsMap.get(card.columnId);
-            column?.cards.push(card);
-        }
-
-        return [...columnsMap.values()].sort((a, b) => a.order - b.order);
-    }, [boardData.columns, cardsMapById]);
 
     return (
         <div className="flex flex-col h-screen">
@@ -103,26 +128,30 @@ function BoardPage() {
                 </Button>
             </header>
 
-            <div ref={scrollContainerRef} className="flex-grow min-h-0 flex flex-col overflow-x-auto">
-                <div {...dragScroll} className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-4 w-fit">
-                    {columns.map((col, idx) =>
-                        <Column
-                            col={col}
-                            key={col.id}
-                            ref={columnRef}
-                            previousOrder={columns[idx - 1] ? columns[idx - 1].order : 0}
-                            nextOrder={columns[idx + 1] ? columns[idx + 1].order : col.order + 1}
+            <DndContext sensors={sensors} onDragEnd={onDragEndHandler}>
+                <div ref={scrollContainerRef} className="flex-grow min-h-0 flex flex-col overflow-x-auto">
+                    <div {...horizontalDragScroll} className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-4 w-fit">
+                        <SortableContext items={columns.map((col) => col.id)}>
+                            {columns.map((col, idx) =>
+                                <Column
+                                    col={col}
+                                    key={col.id}
+                                    ref={columnRef}
+                                    previousOrder={columns[idx - 1] ? columns[idx - 1].order : 0}
+                                    nextOrder={columns[idx + 1] ? columns[idx + 1].order : col.order + 1}
+                                />
+                            )}
+                        </SortableContext>
+                        <NewColumn
+                            boardId={boardData.id}
+                            onExpand={scrollToEnd}
+                            editInitially={columns.length === 0}
+                            onNewColumnAdded={() => (newColumnAddedRef.current = true)}
                         />
-                    )}
-                    <NewColumn
-                        boardId={boardData.id}
-                        onExpand={scrollToEnd}
-                        editInitially={columns.length === 0}
-                        onNewColumnAdded={() => (newColumnAddedRef.current = true)}
-                    />
-                    <div className="w-8 h-1"/>
+                        <div className="w-8 h-1"/>
+                    </div>
                 </div>
-            </div>
+            </DndContext>
 
             <div className="-z-1 absolute top-2/5 left-35 w-28 h-28 bg-blue-500/20 rounded-full blur-xl"></div>
             <div className="-z-1 absolute top-40 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>

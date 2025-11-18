@@ -19,8 +19,9 @@ export type CardTransferType = {
 } | null;
 
 
-export type CardType = BoardType["cards"][number];
 export type CardLabel = CardType["labels"][number];
-export type ColumnWithCards = BoardType["columns"][number] & { cards: BoardType["cards"] };
+export type BoardLabel = BoardType["labels"][number];
+export type ColumnType = BoardType["columns"][number];
+export type CardType = BoardType["columns"][number]["cards"][number];
 export type BoardsType = Awaited<ReturnType<NonNullable<typeof boardsListOptions["queryFn"]>>>
 export type BoardType = Awaited<ReturnType<NonNullable<ReturnType<typeof boardDetailsOptions>["queryFn"]>>>;
