@@ -4,7 +4,6 @@ import React, {lazy} from "react";
 import appCss from "~/styles.css?url";
 import {QueryClient} from "@tanstack/react-query";
 import {authOptions} from "~/lib/client/react-query/query-options";
-import {useMobileDragDrop} from "~/lib/client/hooks/use-mobile-dnd";
 import {createRootRouteWithContext, HeadContent, Outlet, Scripts} from "@tanstack/react-router";
 
 
@@ -37,8 +36,6 @@ function RootComponent() {
 
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-    useMobileDragDrop();
-
     return (
         <html suppressHydrationWarning>
         <head>
