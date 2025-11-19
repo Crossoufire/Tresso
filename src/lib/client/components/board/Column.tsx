@@ -135,8 +135,8 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
             onDragLeave={() => setAcceptColumnDrop("none")}
             className={cn("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-[2px] last:mr-0 " +
                 "px-2 flex-shrink-0 flex flex-col max-h-full",
-                acceptColumnDrop === "left" ? "border-l-red-800 border-r-transparent" :
-                    acceptColumnDrop === "right" ? "border-r-red-800 border-l-transparent" : "",
+                acceptColumnDrop === "left" ? "border-l-cyan-950 border-r-transparent" :
+                    acceptColumnDrop === "right" ? "border-r-cyan-950 border-l-transparent" : "",
             )}
         >
             <div
@@ -144,7 +144,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !deleteColumnMutation.isPending}
                 className={cn("flex-shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
-                    acceptCardDrop && `outline-2 outline-red-800`)
+                    acceptCardDrop && `outline-2 outline-cyan-900`)
                 }
             >
                 <div className="p-2 flex justify-between" {...(col.cards.length ? cardDndProps : {})}>

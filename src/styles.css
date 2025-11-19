@@ -2,6 +2,28 @@
 @import "tw-animate-css";
 
 
+.dnd-poly-drag-image {
+    opacity: 0.5 !important;
+    top: -1000px !important;
+    left: -1000px !important;
+    z-index: 9999 !important;
+    position: absolute !important;
+    pointer-events: none !important;
+}
+
+[draggable="true"] {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dnd-poly-drag-image.dnd-poly-snapback {
+    transition-duration: 250ms !important;
+    transition-timing-function: ease-out !important;
+    transition-property: transform, -webkit-transform !important;
+}
+
+
 /* --- SCROLLBAR -------------------------------------------------------------------------- */
 
 ::-webkit-scrollbar {

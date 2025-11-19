@@ -1,4 +1,5 @@
 import {toast} from "sonner";
+import {cn} from "~/lib/utils/utils";
 import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
@@ -83,11 +84,10 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                 onDrop={onDropHandler}
                 onDragOver={onDragOverHandler}
                 onDragLeave={() => setAcceptDrop("none")}
-                className={
-                    "border-t-2 border-b-2 -mb-[2px] last:mb-0 px-2 py-1 " +
-                    (acceptDrop === "top" ? "border-t-red-800 border-b-transparent" : acceptDrop === "bottom"
-                        ? "border-b-red-800 border-t-transparent" : "border-t-transparent border-b-transparent")
-                }
+                className={cn("border-t-2 border-b-2 border-t-transparent border-b-transparent -mb-[2px] last:mb-0 px-2 py-1",
+                    acceptDrop === "top" ? "border-t-cyan-700 border-b-transparent" :
+                        acceptDrop === "bottom" ? "border-b-cyan-700 border-t-transparent" : ""
+                )}
             >
                 <div
                     draggable
