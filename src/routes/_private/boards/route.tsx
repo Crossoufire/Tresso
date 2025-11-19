@@ -6,7 +6,7 @@ import {getBoardGradient} from "~/lib/utils/gradients";
 import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
-import {Calendar, LogOut, MoreHorizontal, Plus, Users} from "lucide-react";
+import {Calendar, LogOut, MoreVertical, Plus, Users} from "lucide-react";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {useCreateBoardMutation, useDeleteBoardMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
@@ -78,14 +78,13 @@ function BoardsPage() {
                                         </CardTitle>
                                     </div>
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger asChild className="absolute top-3 right-3">
+                                        <DropdownMenuTrigger asChild className="absolute top-1 right-1">
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
                                                 onClick={(ev) => ev.preventDefault()}
-                                                className="opacity-0 group-hover:opacity-100"
                                             >
-                                                <MoreHorizontal className="h-4 w-4 text-muted-foreground"/>
+                                                <MoreVertical className="h-4 w-4 text-muted-foreground"/>
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-48">
@@ -125,8 +124,8 @@ function BoardsPage() {
                 >
                     <CardHeader className="h-full flex items-center">
                         <div className="text-center">
-                            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-2 group-hover:bg-primary/10 duration-200">
-                                <Plus className="h-6 w-6 text-neutral-300 group-hover:text-primary duration-200"/>
+                            <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 duration-200">
+                                <Plus className="size-6 text-neutral-300 group-hover:text-primary duration-200"/>
                             </div>
                             <p className="text-md font-medium text-neutral-300 group-hover:text-primary duration-200">
                                 Create A New Board
