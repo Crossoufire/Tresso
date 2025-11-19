@@ -74,7 +74,6 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
 
     const onDragStartHandler = (ev: React.DragEvent) => {
         ev.dataTransfer.effectAllowed = "move";
-
         const data: ColTransferType = { id: col.id, name: col.name };
         ev.dataTransfer.setData(CONTENT_TYPES.column, JSON.stringify(data));
     }
@@ -116,7 +115,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
                 data: {
                     id: transfer.id,
                     columnId: col.id,
-                    order: sortedCards[sortedCards.length - 1].order + 1,
+                    order: (sortedCards[sortedCards.length - 1]?.order ?? 0) + 1,
                 },
             })
 
