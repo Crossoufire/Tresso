@@ -135,17 +135,17 @@ export const useUpdateCardOrderMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: updateCardOrder,
-        onMutate: async (variables) => {
-            await queryClient.cancelQueries();
-
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.id ? { ...card, ...variables.data } : card),
-                }
-            })
-        },
+        // onMutate: async (variables) => {
+        //     await queryClient.cancelQueries();
+        //
+        //     queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
+        //         if (!oldData) return;
+        //         return {
+        //             ...oldData,
+        //             cards: oldData.cards.map((card) => card.id === variables.data.id ? { ...card, ...variables.data } : card),
+        //         }
+        //     })
+        // },
         onSettled: () => {
             return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
         },
@@ -163,7 +163,13 @@ export const useUpdateCardTitleMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.id ? { ...card, ...variables.data } : card),
+                    columns: [...oldData.columns.map((col) => {
+                        return {
+                            ...col,
+                            cards: col.cards.map((card) =>
+                                card.id === variables.data.id ? { ...card, ...variables.data } : card)
+                        }
+                    })],
                 }
             })
         },
@@ -181,9 +187,13 @@ export const useUpdateCardContentMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) =>
-                        card.id === variables.data.id ? { ...card, ...variables.data } : card
-                    ),
+                    columns: [...oldData.columns.map((col) => {
+                        return {
+                            ...col,
+                            cards: col.cards.map((card) =>
+                                card.id === variables.data.id ? { ...card, ...variables.data } : card)
+                        }
+                    })],
                 }
             })
         },
@@ -201,7 +211,9 @@ export const useDeleteCardMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.filter((card) => card.id !== variables.data.id),
+                    columns: [...oldData.columns.map((col) => {
+                        return { ...col, cards: col.cards.filter((card) => card.id !== variables.data.id) };
+                    })]
                 }
             });
         },
@@ -219,7 +231,25 @@ export const useAddLabelToCardMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.cardId ? { ...card, labels: [...card.labels, data] } : card),
+                    columns: [...oldData.columns.map((col) => {
+                        return {
+                            ...col,
+                            cards: col.cards.map((card) =>
+                                card.id === variables.data.cardId ?
+                                    {
+                                        ...card,
+                                        labels: [...card.labels.map((l) => {
+                                            if (l.labelId === variables.data.labelId) {
+                                                return { ...l, ...data };
+                                            }
+                                            return l;
+                                        })],
+                                    }
+                                    :
+                                    card
+                            ),
+                        }
+                    })],
                 }
             });
         },
@@ -237,9 +267,20 @@ export const useRemoveLabelFromCardMutation = (boardId: number) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.cardId ?
-                        { ...card, labels: card.labels.filter((l) => l.id !== variables.data.labelId) } : card
-                    ),
+                    columns: [...oldData.columns.map((col) => {
+                        return {
+                            ...col,
+                            cards: col.cards.map((card) =>
+                                card.id === variables.data.cardId ?
+                                    {
+                                        ...card,
+                                        labels: card.labels.filter((l) => l.labelId !== variables.data.labelId),
+                                    }
+                                    :
+                                    card
+                            ),
+                        }
+                    })],
                 }
             });
         },

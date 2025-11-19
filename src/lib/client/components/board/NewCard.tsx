@@ -20,7 +20,7 @@ export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardPro
     const buttonRef = useRef<HTMLButtonElement>(null);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-    const onSubmitHandler = (ev: FormEvent<HTMLFormElement>) => {
+    const onSubmitHandler = async (ev: FormEvent<HTMLFormElement>) => {
         ev.preventDefault();
 
         const formData = new FormData(ev.currentTarget);
@@ -28,7 +28,7 @@ export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardPro
             textAreaRef.current.value = "";
         }
 
-        createCardMutation.mutate({
+        await createCardMutation.mutateAsync({
             data: {
                 boardId,
                 columnId,

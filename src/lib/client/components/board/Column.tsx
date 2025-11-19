@@ -1,39 +1,35 @@
 import {toast} from "sonner";
 import {flushSync} from "react-dom";
-import {cn} from "~/lib/utils/utils";
 import {CSS} from "@dnd-kit/utilities";
-import {useSortable} from "@dnd-kit/sortable";
+import {ColumnType} from "~/lib/types/types";
 import {MoreHorizontal, Plus} from "lucide-react";
 import {Card} from "~/lib/client/components/board/Card";
 import {Button} from "~/lib/client/components/ui/button";
 import {NewCard} from "~/lib/client/components/board/NewCard";
+import {SortableContext, useSortable} from "@dnd-kit/sortable";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {EditableText} from "~/lib/client/components/board/EditableText";
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {CardTransferType, ColTransferType, ColumnType, CONTENT_TYPES} from "~/lib/types/types";
-import {useDeleteColumnMutation, useUpdateCardOrderMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
+import {useDeleteColumnMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
 interface ColumnProps {
     col: ColumnType;
-    nextOrder: number;
-    previousOrder: number;
     ref: React.Ref<HTMLDivElement>;
 }
 
 
 export const Column = ({ col, ref }: ColumnProps) => {
     const didMountRef = useRef(false);
-    const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
     const deleteColumnMutation = useDeleteColumnMutation();
+    const cardContainerRef = useRef<HTMLDivElement>(null!);
     const [newCardEdit, setNewCardEdit] = useState(false);
     const updateColumnMutation = useUpdateColumnMutation(col.boardId);
-    const [acceptCardDrop, setAcceptCardDrop] = useState(false);
-    const updateCardOrderMutation = useUpdateCardOrderMutation(col.boardId);
     const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
-        id: col.id,
+        id: `col-${col.id}`,
         data: { type: "column", column: col },
+        disabled: colNameEditState[0] || updateColumnMutation.isPending,
     });
 
     useEffect(() => {
@@ -42,7 +38,7 @@ export const Column = ({ col, ref }: ColumnProps) => {
 
     const style = {
         transition,
-        opacity: isDragging ? 0.6 : 1,
+        opacity: isDragging ? 0.4 : 1,
         zIndex: isDragging ? 999 : undefined,
         transform: CSS.Transform.toString(transform),
     }
@@ -51,17 +47,6 @@ export const Column = ({ col, ref }: ColumnProps) => {
         if (!didMountRef.current || !node) return;
         node.scrollIntoView({ block: "center" });
     }, []);
-
-    const sortedCards = useMemo(() => {
-        return [...col.cards].sort((a, b) => a.order - b.order);
-    }, [col.cards]);
-
-    const onDragStartHandler = (ev: React.DragEvent) => {
-        ev.dataTransfer.effectAllowed = "move";
-
-        const data: ColTransferType = { id: col.id, name: col.name };
-        ev.dataTransfer.setData(CONTENT_TYPES.column, JSON.stringify(data));
-    }
 
     const onChangeColName = (newName: string) => {
         updateColumnMutation.mutate({
@@ -75,7 +60,7 @@ export const Column = ({ col, ref }: ColumnProps) => {
 
     const onAddCardClickHandler = () => {
         flushSync(() => setNewCardEdit(true));
-        listRef.current.scrollTop = listRef.current.scrollHeight;
+        cardContainerRef.current.scrollTop = cardContainerRef.current.scrollHeight;
     }
 
     const onDeleteHandler = () => {
@@ -84,32 +69,6 @@ export const Column = ({ col, ref }: ColumnProps) => {
             onSuccess: () => toast.success("Column successfully deleted"),
         })
     }
-
-    const cardDndProps = {
-        onDragOver: (ev: React.DragEvent) => {
-            if (ev.dataTransfer.types.includes(CONTENT_TYPES.card)) {
-                ev.preventDefault();
-                setAcceptCardDrop(true);
-            }
-        },
-        onDrop: (ev: React.DragEvent) => {
-            const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null") as CardTransferType;
-            if (!transfer) return;
-
-            updateCardOrderMutation.mutate({
-                data: {
-                    id: transfer.id,
-                    columnId: col.id,
-                    order: sortedCards[sortedCards.length - 1].order + 1,
-                },
-            })
-
-            setAcceptCardDrop(false);
-        },
-        onDragLeave: () => {
-            setAcceptCardDrop(false);
-        },
-    };
 
     return (
         <div
@@ -123,14 +82,11 @@ export const Column = ({ col, ref }: ColumnProps) => {
             <div
                 {...listeners}
                 {...attributes}
-                onDragStart={onDragStartHandler}
-                {...(col.cards.length ? {} : cardDndProps)}
+                // TODO: check if can remove it, for now need it when moving cols without moving horizontally
                 draggable={!colNameEditState[0] && !deleteColumnMutation.isPending}
-                className={cn("flex-shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
-                    acceptCardDrop && `outline-2 outline-red-800`)
-                }
+                className="flex-shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative"
             >
-                <div className="p-2 flex justify-between" {...(col.cards.length ? cardDndProps : {})}>
+                <div className="p-2 flex justify-between">
                     <EditableText
                         fieldName="name"
                         buttonClass="px-2"
@@ -163,18 +119,17 @@ export const Column = ({ col, ref }: ColumnProps) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <ul ref={listRef} className="flex-grow overflow-auto p-1 mr-1.5">
-                    {sortedCards.map((card, idx, cards) =>
-                        <Card
-                            card={card}
-                            ref={cardRef}
-                            key={card.id}
-                            columnId={col.id}
-                            previousOrder={cards[idx - 1] ? cards[idx - 1].order : 0}
-                            nextOrder={cards[idx + 1] ? cards[idx + 1].order : card.order + 1}
-                        />
-                    )}
-                </ul>
+                <div ref={cardContainerRef} className="flex flex-grow flex-col gap-3 p-2 overflow-x-hidden overflow-y-auto">
+                    <SortableContext items={col.cards.map((card) => `card-${card.id}`)}>
+                        {col.cards.map((card) =>
+                            <Card
+                                card={card}
+                                ref={cardRef}
+                                key={`card-${card.id}`}
+                            />
+                        )}
+                    </SortableContext>
+                </div>
                 {newCardEdit ?
                     <NewCard
                         columnId={col.id}
@@ -183,7 +138,7 @@ export const Column = ({ col, ref }: ColumnProps) => {
                         nextOrder={col.cards.length === 0 ? 1 : col.cards[col.cards.length - 1].order + 1}
                     />
                     :
-                    <div className="p-3" {...(col.cards.length ? cardDndProps : {})}>
+                    <div className="p-3">
                         <Button onClick={onAddCardClickHandler} disabled={deleteColumnMutation.isPending}>
                             <Plus/> Add Card
                         </Button>
