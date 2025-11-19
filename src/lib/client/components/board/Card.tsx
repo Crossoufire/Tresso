@@ -3,7 +3,7 @@ import {cn} from "~/lib/utils/utils";
 import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
-import {MessageSquareCode, MoreVertical} from "lucide-react";
+import {MessageSquareMore, MoreVertical} from "lucide-react";
 import {CardTransferType, CardType, CONTENT_TYPES} from "~/lib/types/types";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
 import {useDeleteCardMutation, useUpdateCardOrderMutation} from "~/lib/client/react-query/mutations";
@@ -105,9 +105,11 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                                 )}
                             </div>
                         }
-                        <h3 className="my-0 break-words">{card.title}</h3>
+                        <h3 className="my-0 break-words">
+                            {card.title}
+                        </h3>
                         <div className="flex-grow flex items-end mt-auto">
-                            {card.content && <MessageSquareCode className="size-3 opacity-60"/>}
+                            {card.content && <MessageSquareMore className="size-4 opacity-70 mt-2"/>}
                         </div>
                     </div>
                     <DropdownMenu>
