@@ -1,8 +1,8 @@
 import {useMutation, useQueryClient,} from "@tanstack/react-query";
 import {createBoard, deleteBoard, updateBoard} from "~/lib/server/functions/boards";
 import {createLabel, deleteLabel, updateLabel} from "~/lib/server/functions/labels";
-import {boardDetailsOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
 import {createColumn, deleteColumn, updateColumn} from "~/lib/server/functions/columns";
+import {boardDetailsOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
 import {addLabelToCard, createCard, deleteCard, removeLabelFromCard, updateCardContent, updateCardOrder, updateCardTitle} from "~/lib/server/functions/cards";
 
 
@@ -24,10 +24,11 @@ export const useUpdateBoardMutation = () => {
     return useMutation({
         mutationFn: updateBoard,
         onSuccess: (_data, variables) => {
+            void queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey });
             queryClient.setQueryData(boardDetailsOptions(variables.data.id).queryKey, (oldData) => {
                 if (!oldData) return;
                 return { ...oldData, name: variables.data.name ?? "" };
-            })
+            });
         }
     })
 };

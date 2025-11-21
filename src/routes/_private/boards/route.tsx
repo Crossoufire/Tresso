@@ -1,6 +1,8 @@
-import React from "react";
+import React, {useState} from "react";
 import {toast} from "sonner";
 import authClient from "~/lib/utils/auth-client";
+import {Input} from "~/lib/client/components/ui/input";
+import {Label} from "~/lib/client/components/ui/label";
 import {getBoardGradient} from "~/lib/utils/gradients";
 import {Button} from "~/lib/client/components/ui/button";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
@@ -8,7 +10,8 @@ import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
 import {Calendar, Columns3, LogOut, MoreVertical, Plus, Tag, WalletCards} from "lucide-react";
-import {useCreateBoardMutation, useDeleteBoardMutation} from "~/lib/client/react-query/mutations";
+import {useCreateBoardMutation, useDeleteBoardMutation, useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
+import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "~/lib/client/components/ui/dialog";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
@@ -24,15 +27,32 @@ function BoardsPage() {
     const router = useRouter();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [newName, setNewName] = useState("");
     const createBoardMutation = useCreateBoardMutation();
     const deleteBoardMutation = useDeleteBoardMutation();
+    const updateBoardMutation = useUpdateBoardMutation();
     const boardsList = useSuspenseQuery(boardsListOptions).data;
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+    const [editingBoard, setEditingBoard] = useState<{ id: number, name: string } | null>(null);
+
+    const handleUpdateBoardName = () => {
+        if (editingBoard && newName && newName.trim() && newName.trim() !== editingBoard.name) {
+            updateBoardMutation.mutate({ data: { id: editingBoard.id, name: newName.trim() } }, {
+                onError: () => toast.error("Failed to update board name"),
+                onSuccess: () => setIsEditModalOpen(false),
+            });
+        }
+        else {
+            setIsEditModalOpen(false);
+        }
+    }
 
     const onNewBoardClick = (name: string, color: string) => {
         createBoardMutation.mutate({ data: { name, color } });
     }
 
-    const onDeleteBoard = (ev: React.FormEvent, boardId: number) => {
+    const onDeleteBoard = (ev: React.MouseEvent, boardId: number) => {
         ev.preventDefault();
         ev.stopPropagation();
         if (!window.confirm("Are you really sure to delete this board?")) return;
@@ -40,6 +60,12 @@ function BoardsPage() {
         deleteBoardMutation.mutate({ data: { id: boardId } }, {
             onSuccess: () => toast.success("Board deleted successfully"),
         });
+    }
+
+    const handleOpenEditModal = (board: { id: number; name: string }) => {
+        setEditingBoard(board);
+        setNewName(board.name);
+        setIsEditModalOpen(true);
     }
 
     const handleLogout = async () => {
@@ -55,8 +81,12 @@ function BoardsPage() {
             <title>{`Your Boards - Tresso`}</title>
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold mb-1">Your Boards</h1>
-                    <p className="text-muted-foreground">Manage and organize your projects with ease</p>
+                    <h1 className="text-3xl font-bold mb-1">
+                        Your Boards
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Manage and organize your projects with ease
+                    </p>
                 </div>
                 <Button variant="ghost" onClick={handleLogout}>
                     <LogOut className="size-4 mr-1"/> Logout
@@ -77,17 +107,30 @@ function BoardsPage() {
                                             {board.name}
                                         </CardTitle>
                                     </div>
-                                    <DropdownMenu>
+                                    <DropdownMenu
+                                        open={openDropdownId === board.id}
+                                        onOpenChange={(open) => setOpenDropdownId(open ? board.id : null)}
+                                    >
                                         <DropdownMenuTrigger asChild className="absolute top-2 right-1">
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
                                                 onClick={(ev) => ev.preventDefault()}
                                             >
-                                                <MoreVertical className="h-4 w-4 text-muted-foreground"/>
+                                                <MoreVertical className="size-4 text-muted-foreground"/>
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-48">
+                                            <DropdownMenuItem
+                                                onClick={(ev) => {
+                                                    ev.preventDefault();
+                                                    ev.stopPropagation();
+                                                    handleOpenEditModal(board);
+                                                    setOpenDropdownId(null);
+                                                }}
+                                            >
+                                                Rename board
+                                            </DropdownMenuItem>
                                             <DropdownMenuItem
                                                 onClick={(ev) => onDeleteBoard(ev, board.id)}
                                                 className="text-destructive focus:text-destructive"
@@ -114,7 +157,9 @@ function BoardsPage() {
                                     </div>
                                     <div className="flex items-center gap-1 text-gray-300" title="Columns">
                                         <Calendar className="size-4 text-teal-500"/>
-                                        <span>{board.createdAt.toLocaleDateString()}</span>
+                                        <span>{board.createdAt.toLocaleDateString("fr-FR", {
+                                            year: "numeric", month: "short", day: "numeric",
+                                        })}</span>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -142,6 +187,37 @@ function BoardsPage() {
             <div className="-z-1 absolute top-2/5 left-35 w-28 h-28 bg-blue-500/20 rounded-full blur-xl"></div>
             <div className="-z-1 absolute top-40 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>
             <div className="-z-1 absolute bottom-20 left-2/3 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
+
+            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>Rename board</DialogTitle>
+                        <DialogDescription>
+                            Enter a new name for the board.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="pt-3 pb-2">
+                        <Label htmlFor="name" className="mb-2">
+                            New Name
+                        </Label>
+                        <Input
+                            id="name"
+                            value={newName}
+                            className="col-span-3"
+                            onChange={(ev) => setNewName(ev.target.value)}
+                            onKeyDown={(ev) => ev.key === "Enter" && handleUpdateBoardName()}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleUpdateBoardName}>
+                            Save changes
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
