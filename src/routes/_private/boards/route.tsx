@@ -1,13 +1,13 @@
 import React from "react";
 import {toast} from "sonner";
 import authClient from "~/lib/utils/auth-client";
-import {Button} from "~/lib/client/components/ui/button";
 import {getBoardGradient} from "~/lib/utils/gradients";
-import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
+import {Button} from "~/lib/client/components/ui/button";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
-import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
-import {Calendar, LogOut, MoreVertical, Plus, Users} from "lucide-react";
+import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
+import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
+import {Calendar, Columns3, LogOut, MoreVertical, Plus, Tag, WalletCards} from "lucide-react";
 import {useCreateBoardMutation, useDeleteBoardMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
@@ -70,15 +70,15 @@ function BoardsPage() {
                             className={`h-[160px] transition-all duration-200 cursor-pointer border-2 
                             hover:border-primary/30 ${getBoardGradient(board.id, idx)} relative overflow-hidden`}
                         >
-                            <CardHeader className="h-full flex flex-col justify-between p-6">
+                            <CardHeader className="h-full flex flex-col justify-between p-6 pt-2">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 min-w-0">
-                                        <CardTitle className="text-lg font-semibold line-clamp-2">
+                                        <CardTitle className="text-xl font-semibold line-clamp-2">
                                             {board.name}
                                         </CardTitle>
                                     </div>
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger asChild className="absolute top-1 right-1">
+                                        <DropdownMenuTrigger asChild className="absolute top-2 right-1">
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
@@ -97,19 +97,24 @@ function BoardsPage() {
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
-                                <div className="flex items-center justify-between mt-4">
-                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                        <div className="flex items-center gap-1">
-                                            <Users className="h-3 w-3"/>
-                                            <span>1</span>
+                                <div className="py-3">
+                                    <div className="flex items-center gap-6 text-gray-300 mb-1">
+                                        <div className="flex items-center gap-1" title="Columns">
+                                            <Columns3 className="size-4 text-yellow-600 shadow-md"/>
+                                            <span>{board.columnsCount}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="size-4"/>
-                                            <div>
-                                                <div>Created</div>
-                                                <div>{board.createdAt.toLocaleDateString()}</div>
-                                            </div>
+                                        <div className="flex items-center gap-1" title="Cards">
+                                            <WalletCards className="size-4 text-green-600"/>
+                                            <span>{board.cardsCount}</span>
                                         </div>
+                                        <div className="flex items-center gap-1" title="Labels">
+                                            <Tag className="size-4 text-cyan-600 shadow-md"/>
+                                            <span>{board.labelsCount}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-gray-300" title="Columns">
+                                        <Calendar className="size-4 text-teal-500"/>
+                                        <span>{board.createdAt.toLocaleDateString()}</span>
                                     </div>
                                 </div>
                             </CardHeader>
