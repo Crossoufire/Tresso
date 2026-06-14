@@ -25,7 +25,7 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
         onExpand();
     }
 
-    const onSubmitHandler = (ev: React.FormEvent) => {
+    const onSubmitHandler = (ev: React.SubmitEvent) => {
         ev.preventDefault();
         if (!inputRef.current) return;
 

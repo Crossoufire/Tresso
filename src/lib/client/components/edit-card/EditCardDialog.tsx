@@ -50,7 +50,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="w-[500px] max-h-[80vh] overflow-y-auto overflow-x-hidden" ref={dialogRef}>
+            <DialogContent className="w-125 max-h-[80vh] overflow-y-auto overflow-x-hidden" ref={dialogRef}>
                 <DialogHeader>
                     <DialogTitle>Edit Card</DialogTitle>
                     <DialogDescription>
@@ -78,7 +78,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                             <div>
                                 <Textarea
                                     id="content"
-                                    className="min-h-[200px]"
+                                    className="min-h-50"
                                     defaultValue={card.content || ""}
                                     placeholder="Enter card description..."
                                     onChange={(ev) => setNewContent(ev.target.value)}
@@ -107,7 +107,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                 defaultValue={card.content || ""}
                                 placeholder="Add a description to this card..."
                                 onClick={() => setIsEditingContent(!isEditingContent)}
-                                className="min-h-[150px] max-h-[300px] text-sm text-muted-foreground hover:bg-muted/50 cursor-pointer"
+                                className="min-h-37.5 max-h-75 text-sm text-muted-foreground hover:bg-muted/50 cursor-pointer"
                             />
                         }
                     </div>

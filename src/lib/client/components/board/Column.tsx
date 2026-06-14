@@ -132,8 +132,8 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
             onDrop={onDropHandler}
             onDragOver={onDragOverHandler}
             onDragLeave={() => setAcceptColumnDrop("none")}
-            className={cn("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-[2px] last:mr-0 " +
-                "px-2 flex-shrink-0 flex flex-col max-h-full",
+            className={cn("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-0.5 last:mr-0 " +
+                "px-2 shrink-0 flex flex-col max-h-full",
                 acceptColumnDrop === "left" ? "border-l-cyan-950 border-r-transparent" :
                     acceptColumnDrop === "right" ? "border-r-cyan-950 border-l-transparent" : "",
             )}
@@ -142,7 +142,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
                 onDragStart={onDragStartHandler}
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !deleteColumnMutation.isPending}
-                className={cn("flex-shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
+                className={cn("shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
                     acceptCardDrop && `outline-2 outline-cyan-900`)
                 }
             >
@@ -179,7 +179,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <ul ref={listRef} className="flex-grow overflow-auto p-1 mr-1.5">
+                <ul ref={listRef} className="grow overflow-auto p-1 mr-1.5">
                     {sortedCards.map((card, idx, cards) =>
                         <Card
                             card={card}

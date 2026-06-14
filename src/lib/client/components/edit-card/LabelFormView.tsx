@@ -24,7 +24,6 @@ export function LabelFormView({ mode, initialLabel, onSubmit, onBack, isPending 
 
     useEffect(() => {
         if (mode === "edit" && initialLabel) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName(initialLabel.name);
             setColor(initialLabel.color);
         }

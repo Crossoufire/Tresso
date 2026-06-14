@@ -1,9 +1,9 @@
 import {Loader2} from "lucide-react";
 import {Button} from "~/lib/client/components/ui/button";
 import {Textarea} from "~/lib/client/components/ui/textarea";
+import React, {ChangeEvent, KeyboardEvent, useRef} from "react";
 import {useOnClickOutside} from "~/lib/client/hooks/use-clicked-outside";
 import {useCreateCardMutation} from "~/lib/client/react-query/mutations";
-import React, {ChangeEvent, FormEvent, KeyboardEvent, useRef} from "react";
 
 
 interface NewCardProps {
@@ -20,7 +20,7 @@ export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardPro
     const buttonRef = useRef<HTMLButtonElement>(null);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-    const onSubmitHandler = (ev: FormEvent<HTMLFormElement>) => {
+    const onSubmitHandler = (ev: React.SubmitEvent<HTMLFormElement>) => {
         ev.preventDefault();
 
         const formData = new FormData(ev.currentTarget);

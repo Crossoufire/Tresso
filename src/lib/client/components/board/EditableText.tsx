@@ -18,7 +18,7 @@ export function EditableText({ fieldName, value, inputClass, buttonClass, onChan
     const inputRef = useRef<HTMLInputElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const onSubmitHandler = (ev: React.FormEvent<HTMLFormElement>) => {
+    const onSubmitHandler = (ev: React.SubmitEvent<HTMLFormElement>) => {
         ev.preventDefault();
         console.log({ onSubmitHandler: inputRef.current!.value });
         onChange(inputRef.current!.value);

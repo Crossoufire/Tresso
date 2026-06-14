@@ -190,7 +190,7 @@ function BoardsPage() {
             <div className="-z-1 absolute bottom-20 left-2/3 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
 
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[400px]">
+                <DialogContent className="sm:max-w-100">
                     <DialogHeader>
                         <DialogTitle>Rename board</DialogTitle>
                         <DialogDescription>

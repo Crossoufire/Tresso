@@ -84,7 +84,7 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                 onDrop={onDropHandler}
                 onDragOver={onDragOverHandler}
                 onDragLeave={() => setAcceptDrop("none")}
-                className={cn("border-t-2 border-b-2 border-t-transparent border-b-transparent -mb-[2px] last:mb-0 px-2 py-1",
+                className={cn("border-t-2 border-b-2 border-t-transparent border-b-transparent -mb-0.5 last:mb-0 px-2 py-1",
                     acceptDrop === "top" ? "border-t-cyan-700 border-b-transparent" :
                         acceptDrop === "bottom" ? "border-b-cyan-700 border-t-transparent" : ""
                 )}
@@ -94,7 +94,7 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                     role="button"
                     onClick={openEditDialog}
                     onDragStart={onDragStartHandler}
-                    className="bg-card cursor-pointer text-sm rounded-md px-3 py-2 relative group min-h-[60px]"
+                    className="bg-card cursor-pointer text-sm rounded-md px-3 py-2 relative group min-h-15"
                 >
                     <div className="pr-5 flex flex-col h-full">
                         {card.labels.length > 0 &&
@@ -106,10 +106,10 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                                 )}
                             </div>
                         }
-                        <h3 className="my-0 break-words">
+                        <h3 className="my-0 wrap-break-word">
                             {card.title}
                         </h3>
-                        <div className="flex-grow flex items-end mt-auto">
+                        <div className="grow flex items-end mt-auto">
                             {card.content && <MessageSquareMore className="size-4 opacity-70 mt-2"/>}
                         </div>
                     </div>
