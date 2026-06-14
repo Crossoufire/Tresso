@@ -112,8 +112,13 @@ function BoardPage() {
                             col={col}
                             key={col.id}
                             ref={columnRef}
+                            columns={columns}
+                            nextColumnOrder={columns[idx + 1]?.order}
+                            previousColumnOrder={columns[idx - 1]?.order}
                             previousOrder={columns[idx - 1] ? columns[idx - 1].order : 0}
+                            previousPreviousOrder={columns[idx - 2] ? columns[idx - 2].order : 0}
                             nextOrder={columns[idx + 1] ? columns[idx + 1].order : col.order + 1}
+                            nextNextOrder={columns[idx + 2] ? columns[idx + 2].order : (columns[idx + 1]?.order ?? col.order) + 1}
                         />
                     )}
                     <NewColumn

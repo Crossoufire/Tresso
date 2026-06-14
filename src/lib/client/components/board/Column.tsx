@@ -1,26 +1,33 @@
 import {toast} from "sonner";
 import {flushSync} from "react-dom";
 import {cn} from "~/lib/utils/utils";
-import {MoreHorizontal, Plus} from "lucide-react";
 import {Card} from "~/lib/client/components/board/Card";
 import {Button} from "~/lib/client/components/ui/button";
 import {NewCard} from "~/lib/client/components/board/NewCard";
 import {EditableText} from "~/lib/client/components/board/EditableText";
+import {ArrowLeft, ArrowRight, MoreHorizontal, Plus} from "lucide-react";
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {CardTransferType, ColTransferType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteColumnMutation, useUpdateCardOrderMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
 interface ColumnProps {
     nextOrder: number;
     col: ColumnWithCards;
+    nextNextOrder: number;
     previousOrder: number;
+    nextColumnOrder?: number;
+    columns: ColumnWithCards[];
+    previousColumnOrder?: number;
+    previousPreviousOrder: number;
     ref: React.Ref<HTMLDivElement>;
 }
 
 
-export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
+export const Column = (props: ColumnProps) => {
+    const { ref, col, columns, previousOrder, previousColumnOrder, previousPreviousOrder, nextOrder, nextColumnOrder, nextNextOrder } = props;
+
     const didMountRef = useRef(false);
     const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
@@ -29,7 +36,8 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
     const updateColumnMutation = useUpdateColumnMutation(col.boardId);
     const [acceptCardDrop, setAcceptCardDrop] = useState(false);
     const updateCardOrderMutation = useUpdateCardOrderMutation(col.boardId);
-    const [acceptColumnDrop, setAcceptColumnDrop] = useState<"none" | "left" | "right">("none");
+    const isColumnPending = updateColumnMutation.isPending || deleteColumnMutation.isPending;
+    const [acceptColDrop, setAcceptColDrop] = useState<"none" | "left" | "right">("none");
 
     useEffect(() => {
         didMountRef.current = true;
@@ -48,7 +56,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
         const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.column) || "null") as ColTransferType;
         if (!transfer) return;
 
-        const droppedOrder = (acceptColumnDrop === "left") ? previousOrder : nextOrder;
+        const droppedOrder = (acceptColDrop === "left") ? previousOrder : nextOrder;
         const moveOrder = (droppedOrder + col.order) / 2;
 
         updateColumnMutation.mutate({
@@ -59,7 +67,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
             }
         })
 
-        setAcceptColumnDrop("none");
+        setAcceptColDrop("none");
     }
 
     const onDragOverHandler = (ev: React.DragEvent) => {
@@ -69,7 +77,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
         ev.stopPropagation();
         const rect = ev.currentTarget.getBoundingClientRect();
         const midpoint = (rect.left + rect.right) / 2;
-        setAcceptColumnDrop(ev.clientX <= midpoint ? "left" : "right");
+        setAcceptColDrop(ev.clientX <= midpoint ? "left" : "right");
     }
 
     const onDragStartHandler = (ev: React.DragEvent) => {
@@ -88,6 +96,26 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
         })
     }
 
+    const moveColumn = (order: number) => {
+        updateColumnMutation.mutate({
+            data: {
+                order,
+                id: col.id,
+                boardId: col.boardId,
+            }
+        });
+    };
+
+    const onMoveLeftHandler = () => {
+        if (previousColumnOrder === undefined) return;
+        moveColumn((previousPreviousOrder + previousColumnOrder) / 2);
+    };
+
+    const onMoveRightHandler = () => {
+        if (nextColumnOrder === undefined) return;
+        moveColumn((nextColumnOrder + nextNextOrder) / 2);
+    };
+
     const onAddCardClickHandler = () => {
         flushSync(() => setNewCardEdit(true));
         listRef.current.scrollTop = listRef.current.scrollHeight;
@@ -95,6 +123,7 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
 
     const onDeleteHandler = () => {
         if (!window.confirm("Are you sure? All the associated cards will also be deleted!")) return;
+
         deleteColumnMutation.mutate({ data: { id: col.id, boardId: col.boardId } }, {
             onSuccess: () => toast.success("Column successfully deleted"),
         })
@@ -131,18 +160,22 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
             ref={ref}
             onDrop={onDropHandler}
             onDragOver={onDragOverHandler}
-            onDragLeave={() => setAcceptColumnDrop("none")}
-            className={cn("border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-0.5 last:mr-0 " +
-                "px-2 shrink-0 flex flex-col max-h-full",
-                acceptColumnDrop === "left" ? "border-l-cyan-950 border-r-transparent" :
-                    acceptColumnDrop === "right" ? "border-r-cyan-950 border-l-transparent" : "",
+            onDragLeave={() => setAcceptColDrop("none")}
+            className={cn(
+                "border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-0.5 last:mr-0 px-2 shrink-0 flex flex-col max-h-full",
+                acceptColDrop === "left"
+                    ? "border-l-cyan-950 border-r-transparent"
+                    : acceptColDrop === "right"
+                        ? "border-r-cyan-950 border-l-transparent"
+                        : "",
             )}
         >
             <div
                 onDragStart={onDragStartHandler}
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !deleteColumnMutation.isPending}
-                className={cn("shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
+                className={cn(
+                    "shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
                     acceptCardDrop && `outline-2 outline-cyan-900`)
                 }
             >
@@ -164,14 +197,22 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
                                 variant="ghost"
                                 className="opacity-60 hover:opacity-100"
                                 disabled={deleteColumnMutation.isPending}
+                                onPointerDown={(ev) => ev.stopPropagation()}
                             >
                                 <MoreHorizontal className="size-4"/>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={onMoveLeftHandler} disabled={isColumnPending || previousColumnOrder === undefined}>
+                                <ArrowLeft className="size-4"/> Move Left
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={onMoveRightHandler} disabled={isColumnPending || nextColumnOrder === undefined}>
+                                <ArrowRight className="size-4"/> Move Right
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator/>
                             <DropdownMenuItem
                                 onSelect={onDeleteHandler}
-                                disabled={deleteColumnMutation.isPending}
+                                disabled={isColumnPending}
                                 className="text-destructive focus:text-destructive cursor-pointer"
                             >
                                 Delete Column
@@ -185,9 +226,14 @@ export const Column = ({ ref, col, previousOrder, nextOrder }: ColumnProps) => {
                             card={card}
                             ref={cardRef}
                             key={card.id}
+                            columns={columns}
                             columnId={col.id}
+                            nextCardOrder={cards[idx + 1]?.order}
+                            previousCardOrder={cards[idx - 1]?.order}
                             previousOrder={cards[idx - 1] ? cards[idx - 1].order : 0}
+                            previousPreviousOrder={cards[idx - 2] ? cards[idx - 2].order : 0}
                             nextOrder={cards[idx + 1] ? cards[idx + 1].order : card.order + 1}
+                            nextNextOrder={cards[idx + 2] ? cards[idx + 2].order : (cards[idx + 1]?.order ?? card.order) + 1}
                         />
                     )}
                 </ul>

@@ -3,26 +3,43 @@ import {cn} from "~/lib/utils/utils";
 import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
-import {MessageSquareMore, MoreVertical} from "lucide-react";
-import {CardTransferType, CardType, CONTENT_TYPES} from "~/lib/types/types";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
+import {ArrowDown, ArrowUp, MessageSquareMore, MoreVertical} from "lucide-react";
+import {CardTransferType, CardType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteCardMutation, useUpdateCardOrderMutation} from "~/lib/client/react-query/mutations";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger
+} from "~/lib/client/components/ui/dropdown-menu";
 
 
 interface CardProps {
     card: CardType,
     columnId: number;
     nextOrder: number;
+    nextNextOrder: number;
     previousOrder: number;
+    nextCardOrder?: number;
     ref: Ref<HTMLLIElement>;
+    columns: ColumnWithCards[];
+    previousCardOrder?: number;
+    previousPreviousOrder: number;
 }
 
 
-export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProps) => {
+export const Card = (props: CardProps) => {
+    const { card, columns, columnId, nextOrder, nextCardOrder, nextNextOrder, previousOrder, previousCardOrder, previousPreviousOrder, ref } = props;
+
     const deleteCardMutation = useDeleteCardMutation(card.boardId);
     const updateCardOrderMutation = useUpdateCardOrderMutation(card.boardId);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const isPending = updateCardOrderMutation.isPending || deleteCardMutation.isPending;
     const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">("none");
 
     const onDropHandler = (ev: React.DragEvent) => {
@@ -63,13 +80,41 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
         ev.stopPropagation();
     };
 
-    const openEditDialog = (ev: React.MouseEvent) => {
-        ev.stopPropagation();
+    const openEditDialog = () => {
         setIsEditDialogOpen(true);
     };
 
-    const onDeleteHandler = (ev: React.MouseEvent) => {
+    const stopCardClick = (ev: React.SyntheticEvent) => {
         ev.stopPropagation();
+    };
+
+    const moveCard = (order: number, targetColumnId = columnId) => {
+        updateCardOrderMutation.mutate({
+            data: {
+                order,
+                id: card.id,
+                columnId: targetColumnId,
+            }
+        });
+    };
+
+    const onMoveUpHandler = () => {
+        if (previousCardOrder === undefined) return;
+        moveCard((previousPreviousOrder + previousCardOrder) / 2);
+    };
+
+    const onMoveDownHandler = () => {
+        if (nextCardOrder === undefined) return;
+        moveCard((nextCardOrder + nextNextOrder) / 2);
+    };
+
+    const onMoveToColHandler = (targetColumn: ColumnWithCards) => {
+        const sortedTargetCards = [...targetColumn.cards].sort((a, b) => a.order - b.order);
+        const lastOrder = sortedTargetCards[sortedTargetCards.length - 1]?.order ?? 0;
+        moveCard(lastOrder + 1, targetColumn.id);
+    };
+
+    const onDeleteHandler = () => {
         if (!window.confirm("Are you sure to delete this card?")) return;
 
         deleteCardMutation.mutate({ data: { id: card.id } }, {
@@ -119,22 +164,44 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                                 size="sm"
                                 variant="ghost"
                                 title="Card options"
+                                onPointerDown={(ev) => ev.stopPropagation()}
                                 className="absolute top-1 right-0.5 opacity-60 hover:opacity-80 has-[>svg]:px-1.5"
+                                onClick={(ev) => ev.stopPropagation()}
                             >
                                 <MoreVertical className="size-4"/>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={openEditDialog}
-                                disabled={updateCardOrderMutation.isPending || deleteCardMutation.isPending}
-                            >
+                        <DropdownMenuContent align="end" onClick={stopCardClick} onPointerDown={stopCardClick}>
+                            <DropdownMenuItem disabled={isPending} onSelect={openEditDialog}>
                                 Edit Card
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator/>
+                            <DropdownMenuItem onSelect={onMoveUpHandler} disabled={isPending || previousCardOrder === undefined}>
+                                <ArrowUp className="size-4"/> Move Up
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={onMoveDownHandler} disabled={isPending || nextCardOrder === undefined}>
+                                <ArrowDown className="size-4"/> Move Down
+                            </DropdownMenuItem>
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger disabled={isPending || columns.length <= 1}>
+                                    Move to column
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent className="max-w-64" onClick={stopCardClick} onPointerDown={stopCardClick}>
+                                    {columns
+                                        .filter((targetColumn) => targetColumn.id !== columnId)
+                                        .map((targetColumn) =>
+                                            <DropdownMenuItem key={targetColumn.id} onSelect={() => onMoveToColHandler(targetColumn)}>
+                                                <span className="truncate">{targetColumn.name}</span>
+                                            </DropdownMenuItem>
+                                        )
+                                    }
+                                </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                            <DropdownMenuSeparator/>
                             <DropdownMenuItem
-                                onClick={onDeleteHandler}
+                                disabled={isPending}
+                                onSelect={onDeleteHandler}
                                 className="text-destructive focus:text-destructive cursor-pointer"
-                                disabled={deleteCardMutation.isPending || updateCardOrderMutation.isPending}
                             >
                                 Delete Card
                             </DropdownMenuItem>
