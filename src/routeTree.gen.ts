@@ -86,7 +86,7 @@ declare module "@tanstack/react-router" {
     "/_private": {
       id: "/_private";
       path: "";
-      fullPath: "";
+      fullPath: "/";
       preLoaderRoute: typeof PrivateRouteImport;
       parentRoute: typeof rootRouteImport;
     };

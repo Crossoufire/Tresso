@@ -113,7 +113,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                     </div>
                     <div className="space-y-2">
                         <Label>Labels</Label>
-                        <div className="flex items-center gap-2 min-h-[40px] p-2 border rounded-md">
+                        <div className="flex items-center gap-2 min-h-10 p-2 border rounded-md">
                             <div className="flex flex-wrap gap-2 flex-1">
                                 {card.labels.length === 0 ?
                                     <span className="text-sm text-muted-foreground">
@@ -127,7 +127,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                             style={{ backgroundColor: label.color, color: "black" }}
                                         >
                                             {label.name}
-                                            <div onClick={() => removeSelectedLabel(label.id)}>
+                                            <div role="button" onClick={() => removeSelectedLabel(label.id)}>
                                                 <X className="size-3 cursor-pointer hover:bg-black/20 rounded"/>
                                             </div>
                                         </Badge>

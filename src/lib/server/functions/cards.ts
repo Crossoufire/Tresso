@@ -1,6 +1,6 @@
 import {and, eq, max} from "drizzle-orm";
 import {db} from "~/lib/server/database/db";
-import {notFound} from "@tanstack/router-core";
+import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {FormattedError} from "~/lib/utils/error-classes";
@@ -10,7 +10,7 @@ import {createCardSchema, deleteCardSchema, labelToCardSchema, updateCardContent
 
 export const createCard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(createCardSchema)
+    .validator(createCardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const targetBoard = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id)),
@@ -48,7 +48,7 @@ export const createCard = createServerFn({ method: "POST" })
 
 export const updateCardOrder = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(updateCardSchema)
+    .validator(updateCardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
@@ -75,7 +75,7 @@ export const updateCardOrder = createServerFn({ method: "POST" })
 
 export const deleteCard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(deleteCardSchema)
+    .validator(deleteCardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
@@ -98,7 +98,7 @@ export const deleteCard = createServerFn({ method: "POST" })
 
 export const updateCardTitle = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(updateCardTitleSchema)
+    .validator(updateCardTitleSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
@@ -122,7 +122,7 @@ export const updateCardTitle = createServerFn({ method: "POST" })
 
 export const updateCardContent = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(updateCardContentSchema)
+    .validator(updateCardContentSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
@@ -146,7 +146,7 @@ export const updateCardContent = createServerFn({ method: "POST" })
 
 export const addLabelToCard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(labelToCardSchema)
+    .validator(labelToCardSchema)
     .handler(async ({ data: { cardId, labelId }, context: { currentUser } }) => {
         const card = await db.query.cards.findFirst({
             where: eq(s.cards.id, cardId),
@@ -177,7 +177,7 @@ export const addLabelToCard = createServerFn({ method: "POST" })
 
 export const removeLabelFromCard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(labelToCardSchema)
+    .validator(labelToCardSchema)
     .handler(async ({ data: { cardId, labelId }, context: { currentUser } }) => {
         const card = await db.query.cards.findFirst({
             where: eq(s.cards.id, cardId),

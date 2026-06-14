@@ -1,18 +1,9 @@
 import {z} from "zod";
 
 
-// --- USER ---------------------------------------------------------------------
-
-export const userSchema = z.object({
-    name: z.string(),
-    email: z.email(),
-    id: z.number(),
-});
-
-
 // --- COLUMNS ---------------------------------------------------------------------
 
-export const columnSchema = z.object({
+const columnSchema = z.object({
     id: z.number(),
     name: z.string(),
     order: z.number(),
@@ -28,7 +19,7 @@ export const deleteColumnSchema = columnSchema.pick({ id: true, boardId: true })
 
 // --- LABELS ---------------------------------------------------------------------
 
-export const labelSchema = z.object({
+const labelSchema = z.object({
     id: z.number(),
     name: z.string(),
     color: z.string(),
@@ -49,7 +40,7 @@ export const labelToCardSchema = z.object({
 
 // --- CARDS ---------------------------------------------------------------------
 
-export const cardSchema = z.object({
+const cardSchema = z.object({
     id: z.number(),
     title: z.string(),
     order: z.number(),
@@ -71,7 +62,7 @@ export const updateCardContentSchema = cardSchema.pick({ id: true, content: true
 
 // --- BOARDS ---------------------------------------------------------------------
 
-export const boardSchema = z.object({
+const boardSchema = z.object({
     id: z.number(),
     name: z.string(),
     color: z.string(),

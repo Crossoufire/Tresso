@@ -1,6 +1,6 @@
 import {and, eq} from "drizzle-orm";
 import {db} from "~/lib/server/database/db";
-import {notFound} from "@tanstack/router-core";
+import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
 import {createServerFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
@@ -9,7 +9,7 @@ import {createColumnSchema, deleteColumnSchema, updateColumnSchema} from "~/lib/
 
 export const createColumn = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(createColumnSchema)
+    .validator(createColumnSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const targetBoard = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id)),
@@ -35,7 +35,7 @@ export const createColumn = createServerFn({ method: "POST" })
 
 export const updateColumn = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(updateColumnSchema)
+    .validator(updateColumnSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const targetBoard = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id))
@@ -54,7 +54,7 @@ export const updateColumn = createServerFn({ method: "POST" })
 
 export const deleteColumn = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .inputValidator(deleteColumnSchema)
+    .validator(deleteColumnSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const targetBoard = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id))

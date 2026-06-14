@@ -1,5 +1,5 @@
-import React, {useState} from "react";
 import {toast} from "sonner";
+import React, {useState} from "react";
 import authClient from "~/lib/utils/auth-client";
 import {Input} from "~/lib/client/components/ui/input";
 import {Label} from "~/lib/client/components/ui/label";
@@ -97,7 +97,7 @@ function BoardsPage() {
                 {boardsList.map((board, idx) =>
                     <Link key={board.id} to="/board/$boardId" params={{ boardId: board.id }} className="group">
                         <Card
-                            className={`h-[160px] transition-all duration-200 cursor-pointer border-2 
+                            className={`h-40 transition-all duration-200 cursor-pointer border-2 
                             hover:border-primary/30 ${getBoardGradient(board.id, idx)} relative overflow-hidden`}
                         >
                             <CardHeader className="h-full flex flex-col justify-between p-6 pt-2">
@@ -169,7 +169,7 @@ function BoardsPage() {
 
                 <Card
                     onClick={() => onNewBoardClick("New Board", "#000000")}
-                    className="h-[160px] border-2 border-dashed border-muted-foreground/25 hover:border-primary/50
+                    className="h-40 border-2 border-dashed border-muted-foreground/25 hover:border-primary/50
                     transition-colors duration-200 cursor-pointer group"
                 >
                     <CardHeader className="h-full flex items-center">

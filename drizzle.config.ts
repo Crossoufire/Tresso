@@ -1,16 +1,16 @@
 import {serverEnv} from "~/env/server";
-import type {Config} from "drizzle-kit";
+import {defineConfig} from "drizzle-kit";
 
 
-export default {
+export default defineConfig({
+    out: "./drizzle",
+    schema: "./src/lib/server/database/schemas/index.ts",
     strict: true,
     verbose: true,
-    out: "./drizzle",
     breakpoints: true,
     dialect: "sqlite",
     casing: "snake_case",
-    schema: "./src/lib/server/database/schemas/index.ts",
     dbCredentials: {
         url: serverEnv.DATABASE_URL,
     },
-} satisfies Config;
+});

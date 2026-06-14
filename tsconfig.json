@@ -3,6 +3,12 @@
         "**/*.ts",
         "**/*.tsx"
     ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build",
+        "coverage"
+    ],
     "compilerOptions": {
         "strict": true,
         "esModuleInterop": true,
@@ -14,18 +20,21 @@
             "DOM.Iterable",
             "ES2022"
         ],
+        "types": [
+            "bun-types"
+        ],
         "isolatedModules": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "target": "ES2022",
         "allowJs": true,
+        "noEmit": true,
+        "strictNullChecks": true,
         "forceConsistentCasingInFileNames": true,
-        "baseUrl": ".",
         "paths": {
             "~/*": [
                 "./src/*"
             ]
-        },
-        "noEmit": true
+        }
     }
 }

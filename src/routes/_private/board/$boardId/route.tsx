@@ -15,7 +15,9 @@ import {authOptions, boardDetailsOptions} from "~/lib/client/react-query/query-o
 
 export const Route = createFileRoute("/_private/board/$boardId")({
     params: { parse: ({ boardId }) => ({ boardId: Number(boardId) }) },
-    loader: ({ context: { queryClient }, params: { boardId } }) => queryClient.ensureQueryData(boardDetailsOptions(boardId)),
+    loader: ({ context: { queryClient }, params: { boardId } }) => {
+        return queryClient.ensureQueryData(boardDetailsOptions(boardId));
+    },
     component: BoardPage,
 })
 
@@ -79,7 +81,7 @@ function BoardPage() {
         <div className="flex flex-col h-screen">
             <title>{`${boardData.name} - Tresso`}</title>
 
-            <header className="flex items-center justify-between p-4 border-b  backdrop-blur-sm flex-shrink-0">
+            <header className="flex items-center justify-between p-4 border-b  backdrop-blur-sm shrink-0">
                 <div className="flex items-center gap-4">
                     <Button size="sm" variant="ghost" asChild={true}>
                         <Link to="/boards">
@@ -103,8 +105,8 @@ function BoardPage() {
                 </Button>
             </header>
 
-            <div ref={scrollContainerRef} className="flex-grow min-h-0 flex flex-col overflow-x-auto">
-                <div {...dragScroll} className="flex flex-grow min-h-0 h-full pl-2 pb-4 mt-4 w-fit">
+            <div ref={scrollContainerRef} className="grow min-h-0 flex flex-col overflow-x-auto">
+                <div {...dragScroll} className="flex grow min-h-0 h-full pl-2 pb-4 mt-4 w-fit">
                     {columns.map((col, idx) =>
                         <Column
                             col={col}

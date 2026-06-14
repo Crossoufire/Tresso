@@ -9,7 +9,7 @@ import {createRootRouteWithContext, HeadContent, Outlet, Scripts} from "@tanstac
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
     beforeLoad: async ({ context: { queryClient } }) => {
-        return queryClient.fetchQuery(authOptions);
+        return queryClient.ensureQueryData(authOptions);
     },
     head: () => ({
         meta: [
@@ -37,21 +37,20 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
     return (
-        <html suppressHydrationWarning>
+        <html lang="en" className="dark" suppressHydrationWarning>
         <head>
             <HeadContent/>
         </head>
         <body>
 
         <div className="h-screen flex flex-col min-h-0">
-            <div className="flex-grow min-h-0 h-full flex flex-col">
+            <div className="grow min-h-0 h-full flex flex-col">
                 <Toaster/>
                 {children}
             </div>
         </div>
 
         {import.meta.env.DEV && <ReactQueryDevtools/>}
-        {import.meta.env.DEV && <TanStackRouterDevtools/>}
 
         <Scripts/>
 
@@ -59,11 +58,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </html>
     )
 }
-
-
-const TanStackRouterDevtools = lazy(() =>
-    import("@tanstack/react-router-devtools").then((res) => ({ default: res.TanStackRouterDevtools }))
-);
 
 
 const ReactQueryDevtools = lazy(() =>

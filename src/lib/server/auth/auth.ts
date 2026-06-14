@@ -3,8 +3,8 @@ import {serverEnv} from "~/env/server";
 import {clientEnv} from "~/env/client";
 import {db} from "~/lib/server/database/db";
 import {createServerOnlyFn} from "@tanstack/react-start";
-import {reactStartCookies} from "better-auth/react-start";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
+import {tanstackStartCookies} from "better-auth/tanstack-start";
 
 
 export const auth = createServerOnlyFn(() => betterAuth({
@@ -23,10 +23,10 @@ export const auth = createServerOnlyFn(() => betterAuth({
     advanced: {
         cookiePrefix: "tresso",
         database: {
-            useNumberId: true,
+            generateId: false,
         },
     },
     plugins: [
-        reactStartCookies(),
+        tanstackStartCookies(),
     ]
 }))();

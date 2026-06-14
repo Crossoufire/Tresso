@@ -1,6 +1,6 @@
 import {z} from "zod";
 import {db} from "~/lib/server/database/db";
-import {notFound} from "@tanstack/router-core";
+import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
 import {and, asc, desc, eq, sql} from "drizzle-orm";
 import {createServerFn} from "@tanstack/react-start";
@@ -19,21 +19,15 @@ export const getBoards = createServerFn({ method: "GET" })
                 color: s.boards.color,
                 userId: s.boards.userId,
                 createdAt: s.boards.createdAt,
-                cardsCount: sql<number>`(
-                    SELECT COUNT(*)
-                    FROM ${s.cards}
-                    WHERE ${s.cards.boardId} = boards.id
-                )`,
-                columnsCount: sql<number>`(
-                    SELECT COUNT(*)
-                    FROM ${s.columns}
-                    WHERE ${s.columns.boardId} = boards.id
-                )`,
-                labelsCount: sql<number>`(
-                    SELECT COUNT(*)
-                    FROM ${s.labels}
-                    WHERE ${s.labels.boardId} = boards.id
-                )`,
+                cardsCount: sql<number>`(SELECT COUNT(*)
+                                         FROM ${s.cards}
+                                         WHERE ${s.cards.boardId} = boards.id)`,
+                columnsCount: sql<number>`(SELECT COUNT(*)
+                                           FROM ${s.columns}
+                                           WHERE ${s.columns.boardId} = boards.id)`,
+                labelsCount: sql<number>`(SELECT COUNT(*)
+                                          FROM ${s.labels}
+                                          WHERE ${s.labels.boardId} = boards.id)`,
             })
             .from(s.boards)
             .where(eq(s.boards.userId, currentUser.id))
@@ -43,7 +37,7 @@ export const getBoards = createServerFn({ method: "GET" })
 
 export const getBoard = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .inputValidator((data) => tryNotFound(data, z.object({ boardId: z.number() })))
+    .validator((data) => tryNotFound(data, z.object({ boardId: z.number() })))
     .handler(async ({ data: { boardId }, context: { currentUser } }) => {
         const boardData = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, boardId), eq(s.boards.userId, currentUser.id)),
@@ -75,7 +69,7 @@ export const getBoard = createServerFn({ method: "GET" })
 
 export const createBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(createBoardSchema)
+    .validator(createBoardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         const [newBoard] = await db
             .insert(s.boards)
@@ -90,7 +84,7 @@ export const createBoard = createServerFn({ method: "POST" })
 
 export const updateBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(updateBoardSchema)
+    .validator(updateBoardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
         await db
             .update(s.boards)
@@ -101,7 +95,7 @@ export const updateBoard = createServerFn({ method: "POST" })
 
 export const deleteBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
-    .inputValidator(deleteBoardSchema)
+    .validator(deleteBoardSchema)
     .handler(async ({ data: { id }, context: { currentUser } }) => {
         await db
             .delete(s.boards)

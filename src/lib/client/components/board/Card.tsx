@@ -91,6 +91,7 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
             >
                 <div
                     draggable
+                    role="button"
                     onClick={openEditDialog}
                     onDragStart={onDragStartHandler}
                     className="bg-card cursor-pointer text-sm rounded-md px-3 py-2 relative group min-h-[60px]"

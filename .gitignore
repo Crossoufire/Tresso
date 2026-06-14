@@ -22,6 +22,8 @@ dist
 **/site.db
 /instance/**
 
-tsconfig.tsbuildinfo
-
 .tanstack
+/tsconfig.tsbuildinfo
+**/routeTree.gen.ts
+/bun.lock
+how-errors-works.md
