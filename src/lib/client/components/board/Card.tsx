@@ -106,7 +106,7 @@ export const Card = ({ card, columnId, nextOrder, previousOrder, ref }: CardProp
                                 )}
                             </div>
                         }
-                        <h3 className="my-0 wrap-break-word">
+                        <h3 className="my-0 whitespace-pre-wrap wrap-break-word">
                             {card.title}
                         </h3>
                         <div className="grow flex items-end mt-auto">

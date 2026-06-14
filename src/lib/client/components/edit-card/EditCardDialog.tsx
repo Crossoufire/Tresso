@@ -62,11 +62,12 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                     <div className="space-y-2">
                         <Label htmlFor="title">Title</Label>
                         <EditableText
+                            multiline={true}
                             fieldName="title"
                             editState={titleEditState}
-                            inputClass="text-lg px-2 py-2 w-full rounded-md"
-                            buttonClass="text-lg px-2 py-1 h-full text-left"
                             onChange={(value) => updateCardTitleHandler(value)}
+                            inputClass="text-lg px-2 py-2 min-h-24 w-full rounded-md resize-y"
+                            buttonClass="text-lg px-2 py-1 h-full w-full justify-start text-left"
                             value={(updateCardTitleMutation.isPending && updateCardTitleMutation.variables.data.title) ?
                                 updateCardTitleMutation.variables.data.title : card.title
                             }
