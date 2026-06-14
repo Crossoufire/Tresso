@@ -6,6 +6,11 @@ import {boardDetailsOptions, boardsListOptions} from "~/lib/client/react-query/q
 import {addLabelToCard, createCard, deleteCard, removeLabelFromCard, updateCardContent, updateCardOrder, updateCardTitle} from "~/lib/server/functions/cards";
 
 
+const invalidateBoardsList = (queryClient: ReturnType<typeof useQueryClient>) => {
+    void queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey });
+};
+
+
 // --- BOARDS LIST ----------------------------------------------------
 
 export const useCreateBoardMutation = () => {
@@ -52,6 +57,7 @@ export const useCreateColumnMutation = () => {
     return useMutation({
         mutationFn: createColumn,
         onSuccess: (data) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return { ...oldData, columns: [...oldData.columns, data] };
@@ -80,6 +86,7 @@ export const useUpdateColumnMutation = (boardId: number) => {
             })
         },
         onSettled: () => {
+            invalidateBoardsList(queryClient);
             return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
         },
     })
@@ -92,6 +99,7 @@ export const useDeleteColumnMutation = () => {
     return useMutation({
         mutationFn: deleteColumn,
         onSuccess: async (_data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(variables.data.boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -113,6 +121,7 @@ export const useCreateCardMutation = (boardId: number) => {
     return useMutation({
         mutationFn: createCard,
         onSuccess: (data) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return { ...oldData, cards: [...oldData.cards, data] }
@@ -139,6 +148,7 @@ export const useUpdateCardOrderMutation = (boardId: number) => {
             })
         },
         onSettled: () => {
+            invalidateBoardsList(queryClient);
             return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
         },
     })
@@ -151,6 +161,7 @@ export const useUpdateCardTitleMutation = (boardId: number) => {
     return useMutation({
         mutationFn: updateCardTitle,
         onSuccess: async (_data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -169,6 +180,7 @@ export const useUpdateCardContentMutation = (boardId: number) => {
     return useMutation({
         mutationFn: updateCardContent,
         onSuccess: async (_data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -189,6 +201,7 @@ export const useDeleteCardMutation = (boardId: number) => {
     return useMutation({
         mutationFn: deleteCard,
         onSuccess: async (_data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -207,6 +220,7 @@ export const useAddLabelToCardMutation = (boardId: number) => {
     return useMutation({
         mutationFn: addLabelToCard,
         onSuccess: async (data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -225,6 +239,7 @@ export const useRemoveLabelFromCardMutation = (boardId: number) => {
     return useMutation({
         mutationFn: removeLabelFromCard,
         onSuccess: async (_data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -247,6 +262,7 @@ export const useCreateLabelMutation = () => {
     return useMutation({
         mutationFn: createLabel,
         onSuccess: async (data) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -265,6 +281,7 @@ export const useUpdateLabelMutation = () => {
     return useMutation({
         mutationFn: updateLabel,
         onSuccess: async (data) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
@@ -283,6 +300,7 @@ export const useDeleteLabelMutation = () => {
     return useMutation({
         mutationFn: deleteLabel,
         onSuccess: async (_data, variables) => {
+            invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(variables.data.boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {

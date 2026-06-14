@@ -1,6 +1,7 @@
 import {toast} from "sonner";
 import React, {useState} from "react";
 import authClient from "~/lib/utils/auth-client";
+import {formatUpdatedAt} from "~/lib/utils/utils";
 import {Input} from "~/lib/client/components/ui/input";
 import {Label} from "~/lib/client/components/ui/label";
 import {getBoardGradient} from "~/lib/utils/gradients";
@@ -9,10 +10,10 @@ import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
-import {Calendar, Columns3, LogOut, MoreVertical, Plus, Tag, WalletCards} from "lucide-react";
+import {CalendarClock, Columns3, LogOut, MoreVertical, Plus, Tag, WalletCards} from "lucide-react";
 import {useCreateBoardMutation, useDeleteBoardMutation, useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
-import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "~/lib/client/components/ui/dialog";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
+import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "~/lib/client/components/ui/dialog";
 
 
 export const Route = createFileRoute("/_private/boards")({
@@ -155,11 +156,11 @@ function BoardsPage() {
                                             <span>{board.labelsCount}</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-1 text-gray-300" title="Columns">
-                                        <Calendar className="size-4 text-teal-500"/>
-                                        <span>{board.createdAt.toLocaleDateString("fr-FR", {
-                                            year: "numeric", month: "short", day: "numeric",
-                                        })}</span>
+                                    <div className="mt-4 flex items-center gap-1 text-xs text-gray-300" title="Last updated">
+                                        <CalendarClock className="size-4 shrink-0 text-teal-500"/>
+                                        <span className="truncate">
+                                            Updated {formatUpdatedAt(board.updatedAt)}
+                                        </span>
                                     </div>
                                 </div>
                             </CardHeader>

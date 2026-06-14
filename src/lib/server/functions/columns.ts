@@ -7,6 +7,14 @@ import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createColumnSchema, deleteColumnSchema, updateColumnSchema} from "~/lib/types/schemas";
 
 
+const touchBoard = async (boardId: number) => {
+    await db
+        .update(s.boards)
+        .set({ updatedAt: new Date() })
+        .where(eq(s.boards.id, boardId));
+};
+
+
 export const createColumn = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(createColumnSchema)
@@ -29,6 +37,8 @@ export const createColumn = createServerFn({ method: "POST" })
                 order: targetBoard.columns.length + 1,
             }).returning();
 
+        await touchBoard(data.boardId);
+
         return createdCol;
     });
 
@@ -49,6 +59,8 @@ export const updateColumn = createServerFn({ method: "POST" })
             .update(s.columns)
             .set({ ...data })
             .where(eq(s.columns.id, data.id));
+
+        await touchBoard(data.boardId);
     });
 
 
@@ -67,4 +79,6 @@ export const deleteColumn = createServerFn({ method: "GET" })
         await db
             .delete(s.columns)
             .where(eq(s.columns.id, data.id));
+
+        await touchBoard(data.boardId);
     });

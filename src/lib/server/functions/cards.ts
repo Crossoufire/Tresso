@@ -8,6 +8,14 @@ import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createCardSchema, deleteCardSchema, labelToCardSchema, updateCardContentSchema, updateCardSchema, updateCardTitleSchema} from "~/lib/types/schemas";
 
 
+const touchBoard = async (boardId: number) => {
+    await db
+        .update(s.boards)
+        .set({ updatedAt: new Date() })
+        .where(eq(s.boards.id, boardId));
+};
+
+
 export const createCard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(createCardSchema)
@@ -42,6 +50,8 @@ export const createCard = createServerFn({ method: "POST" })
                 content: data.content || null,
             }).returning();
 
+        await touchBoard(data.boardId);
+
         return { ...newCard, labels: [] };
     });
 
@@ -69,6 +79,8 @@ export const updateCardOrder = createServerFn({ method: "POST" })
             .where(eq(s.cards.id, data.id))
             .returning();
 
+        await touchBoard(cardData.boardId);
+
         return updatedCard;
     });
 
@@ -93,6 +105,8 @@ export const deleteCard = createServerFn({ method: "POST" })
         await db
             .delete(s.cards)
             .where(eq(s.cards.id, data.id));
+
+        await touchBoard(cardData.boardId);
     });
 
 
@@ -117,6 +131,8 @@ export const updateCardTitle = createServerFn({ method: "POST" })
             .update(s.cards)
             .set({ title: data.title })
             .where(eq(s.cards.id, data.id));
+
+        await touchBoard(cardData.boardId);
     });
 
 
@@ -141,6 +157,8 @@ export const updateCardContent = createServerFn({ method: "POST" })
             .update(s.cards)
             .set({ content: data.content })
             .where(eq(s.cards.id, data.id));
+
+        await touchBoard(cardData.boardId);
     });
 
 
@@ -171,6 +189,8 @@ export const addLabelToCard = createServerFn({ method: "POST" })
             .values({ cardId: card.id, labelId: labelId })
             .onConflictDoNothing();
 
+        await touchBoard(card.boardId);
+
         return labelToAdd;
     });
 
@@ -199,5 +219,7 @@ export const removeLabelFromCard = createServerFn({ method: "POST" })
 
         await db
             .delete(s.cardsToLabels)
-            .where(and(eq(s.cardsToLabels.cardId, cardId), eq(s.cardsToLabels.labelId, labelId)))
+            .where(and(eq(s.cardsToLabels.cardId, cardId), eq(s.cardsToLabels.labelId, labelId)));
+
+        await touchBoard(card.boardId);
     });

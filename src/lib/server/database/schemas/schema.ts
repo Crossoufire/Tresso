@@ -13,7 +13,8 @@ export const boards = sqliteTable("boards", {
     name: text("name").notNull(),
     color: text("color").notNull(),
     userId: integer("user_id").notNull().references(() => user.id),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
 
@@ -33,7 +34,7 @@ export const columns = sqliteTable("columns", {
     name: text("name").notNull(),
     order: integer("order").notNull(),
     archived: integer("archived", { mode: "boolean" }).default(false).notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(new Date()).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
     boardId: integer("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
 });
 
@@ -52,7 +53,7 @@ export const cards = sqliteTable("cards", {
     title: text("title").notNull(),
     content: text("content"),
     order: integer("order").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
     boardId: integer("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
     columnId: integer("column_id").notNull().references(() => columns.id, { onDelete: "cascade" }),
 });
@@ -75,7 +76,7 @@ export const labels = sqliteTable("labels", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     name: text("name").notNull(),
     color: text("color").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(new Date()).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
     boardId: integer("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
 });
 

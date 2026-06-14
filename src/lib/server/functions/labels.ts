@@ -7,6 +7,14 @@ import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createLabelSchema, deleteLabelSchema, updateLabelSchema} from "~/lib/types/schemas";
 
 
+const touchBoard = async (boardId: number) => {
+    await db
+        .update(s.boards)
+        .set({ updatedAt: new Date() })
+        .where(eq(s.boards.id, boardId));
+};
+
+
 export const createLabel = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(createLabelSchema)
@@ -23,6 +31,8 @@ export const createLabel = createServerFn({ method: "POST" })
             .insert(s.labels)
             .values({ ...data })
             .returning();
+
+        await touchBoard(data.boardId);
 
         return newLabel;
     });
@@ -47,6 +57,8 @@ export const updateLabel = createServerFn({ method: "POST" })
             .where(eq(s.labels.id, data.id))
             .returning();
 
+        await touchBoard(label.boardId);
+
         return updatedLabel;
     });
 
@@ -67,4 +79,6 @@ export const deleteLabel = createServerFn({ method: "POST" })
         await db
             .delete(s.labels)
             .where(eq(s.labels.id, data.id));
+
+        await touchBoard(label.boardId);
     });

@@ -19,19 +19,14 @@ export const getBoards = createServerFn({ method: "GET" })
                 color: s.boards.color,
                 userId: s.boards.userId,
                 createdAt: s.boards.createdAt,
-                cardsCount: sql<number>`(SELECT COUNT(*)
-                                         FROM ${s.cards}
-                                         WHERE ${s.cards.boardId} = boards.id)`,
-                columnsCount: sql<number>`(SELECT COUNT(*)
-                                           FROM ${s.columns}
-                                           WHERE ${s.columns.boardId} = boards.id)`,
-                labelsCount: sql<number>`(SELECT COUNT(*)
-                                          FROM ${s.labels}
-                                          WHERE ${s.labels.boardId} = boards.id)`,
+                updatedAt: s.boards.updatedAt,
+                cardsCount: sql<number>`(SELECT COUNT(*) FROM ${s.cards} WHERE ${s.cards.boardId} = boards.id)`,
+                labelsCount: sql<number>`(SELECT COUNT(*) FROM ${s.labels} WHERE ${s.labels.boardId} = boards.id)`,
+                columnsCount: sql<number>`(SELECT COUNT(*) FROM ${s.columns} WHERE ${s.columns.boardId} = boards.id)`,
             })
             .from(s.boards)
             .where(eq(s.boards.userId, currentUser.id))
-            .orderBy(desc(s.boards.createdAt));
+            .orderBy(desc(s.boards.updatedAt));
     });
 
 
@@ -86,10 +81,12 @@ export const updateBoard = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(updateBoardSchema)
     .handler(async ({ data, context: { currentUser } }) => {
+        const { id, ...updates } = data;
+
         await db
             .update(s.boards)
-            .set({ ...data })
-            .where(and(eq(s.boards.id, data.id), eq(s.boards.userId, currentUser.id)));
+            .set({ ...updates, updatedAt: new Date() })
+            .where(and(eq(s.boards.id, id), eq(s.boards.userId, currentUser.id)));
     });
 
 
