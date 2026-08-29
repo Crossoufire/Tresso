@@ -9,11 +9,12 @@ import {useCreateCardMutation} from "~/lib/client/react-query/mutations";
 interface NewCardProps {
     boardId: number;
     columnId: number;
+    onCancel: () => void;
     onComplete: () => void;
 }
 
 
-export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
+export function NewCard({ columnId, boardId, onCancel, onComplete }: NewCardProps) {
     const formRef = useRef<HTMLFormElement>(null);
     const createCardMutation = useCreateCardMutation(boardId);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -40,7 +41,7 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
             buttonRef.current?.click();
         }
         if (ev.key === "Escape") {
-            onComplete();
+            onCancel();
         }
     };
 
@@ -59,7 +60,7 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
             return;
         }
 
-        onComplete();
+        onCancel();
     };
 
     useOnClickOutside(formRef, handleClickOutside);
@@ -83,7 +84,7 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
                 </div>
                 <div>
                     <div className="flex items-center justify-end gap-2">
-                        <Button size="sm" type="button" variant="ghost" onClick={onComplete} disabled={createCardMutation.isPending}>
+                        <Button size="sm" type="button" variant="ghost" onClick={onCancel} disabled={createCardMutation.isPending}>
                             Cancel
                         </Button>
                         <Button size="sm" ref={buttonRef} disabled={createCardMutation.isPending} type="submit">

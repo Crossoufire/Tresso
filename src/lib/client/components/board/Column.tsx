@@ -223,6 +223,10 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                         columnId={col.id}
                         boardId={col.boardId}
                         onComplete={() => setNewCardEdit(false)}
+                        onCancel={() => {
+                            flushSync(() => setNewCardEdit(false));
+                            listRef.current.scrollTop = 0;
+                        }}
                     />
                     :
                     <div className="shrink-0 border-t p-2" {...(col.cards.length ? cardDndProps : {})}>
