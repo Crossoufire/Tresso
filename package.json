@@ -9,6 +9,7 @@
     "scripts": {
         "lint": "oxlint",
         "knip": "knip-bun",
+        "test": "bun test",
         "dk": "drizzle-kit",
         "ui": "bunx shadcn@latest",
         "build": "bun --bun vite build",

@@ -93,14 +93,14 @@ export const useUpdateColumnMutation = (boardId: number) => {
 };
 
 
-export const useDeleteColumnMutation = () => {
+export const useDeleteColumnMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: deleteColumn,
         onSuccess: async (_data, variables) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(variables.data.boardId).queryKey, (oldData) => {
+            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
                     ...oldData,

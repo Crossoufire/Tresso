@@ -62,21 +62,26 @@ export const updateCardOrder = createServerFn({ method: "POST" })
     .handler(async ({ data, context: { currentUser } }) => {
         const cardData = await db.query.cards.findFirst({
             where: eq(s.cards.id, data.id),
-            with: {
-                board: {
-                    columns: { userId: true },
-                },
-            },
+            with: { board: true },
         });
 
         if (!cardData || cardData.board.userId !== currentUser.id) {
             throw notFound();
         }
 
+        const targetColumn = await db.query.columns.findFirst({
+            where: and(eq(s.columns.id, data.columnId), eq(s.columns.boardId, cardData.boardId)),
+        });
+
+        if (!targetColumn) {
+            throw notFound();
+        }
+
+        const { id, ...updates } = data;
         const [updatedCard] = await db
             .update(s.cards)
-            .set({ ...data })
-            .where(eq(s.cards.id, data.id))
+            .set(updates)
+            .where(and(eq(s.cards.id, id), eq(s.cards.boardId, cardData.boardId)))
             .returning();
 
         await touchBoard(cardData.boardId);

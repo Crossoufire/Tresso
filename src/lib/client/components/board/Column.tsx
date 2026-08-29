@@ -31,8 +31,8 @@ export const Column = (props: ColumnProps) => {
     const didMountRef = useRef(false);
     const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
-    const deleteColumnMutation = useDeleteColumnMutation();
     const [newCardEdit, setNewCardEdit] = useState(false);
+    const deleteColumnMutation = useDeleteColumnMutation(col.boardId);
     const updateColumnMutation = useUpdateColumnMutation(col.boardId);
     const [acceptCardDrop, setAcceptCardDrop] = useState(false);
     const updateCardOrderMutation = useUpdateCardOrderMutation(col.boardId);
@@ -59,14 +59,7 @@ export const Column = (props: ColumnProps) => {
         const droppedOrder = (acceptColDrop === "left") ? previousOrder : nextOrder;
         const moveOrder = (droppedOrder + col.order) / 2;
 
-        updateColumnMutation.mutate({
-            data: {
-                id: transfer.id,
-                order: moveOrder,
-                boardId: col.boardId,
-            }
-        })
-
+        updateColumnMutation.mutate({ data: { id: transfer.id, order: moveOrder } });
         setAcceptColDrop("none");
     }
 
@@ -87,23 +80,11 @@ export const Column = (props: ColumnProps) => {
     }
 
     const onChangeColName = (newName: string) => {
-        updateColumnMutation.mutate({
-            data: {
-                id: col.id,
-                name: newName,
-                boardId: col.boardId,
-            }
-        })
+        updateColumnMutation.mutate({ data: { id: col.id, name: newName } });
     }
 
     const moveColumn = (order: number) => {
-        updateColumnMutation.mutate({
-            data: {
-                order,
-                id: col.id,
-                boardId: col.boardId,
-            }
-        });
+        updateColumnMutation.mutate({ data: { order, id: col.id } });
     };
 
     const onMoveLeftHandler = () => {
@@ -124,7 +105,7 @@ export const Column = (props: ColumnProps) => {
     const onDeleteHandler = () => {
         if (!window.confirm("Are you sure? All the associated cards will also be deleted!")) return;
 
-        deleteColumnMutation.mutate({ data: { id: col.id, boardId: col.boardId } }, {
+        deleteColumnMutation.mutate({ data: { id: col.id } }, {
             onSuccess: () => toast.success("Column successfully deleted"),
         })
     }

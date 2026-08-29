@@ -13,9 +13,9 @@ const columnSchema = z.object({
 
 export const createColumnSchema = columnSchema.pick({ name: true, boardId: true });
 
-export const updateColumnSchema = columnSchema.partial().required({ id: true, boardId: true });
+export const updateColumnSchema = columnSchema.partial().required({ id: true }).omit({ boardId: true });
 
-export const deleteColumnSchema = columnSchema.pick({ id: true, boardId: true });
+export const deleteColumnSchema = columnSchema.pick({ id: true });
 
 // --- LABELS ---------------------------------------------------------------------
 

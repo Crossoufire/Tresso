@@ -1,15 +1,7 @@
 import z from "zod";
 import {createMiddleware} from "@tanstack/react-start";
 import {FormattedError} from "~/lib/utils/error-classes";
-
-
-function createCleanError(originalError: Error, message?: string): Error {
-    const cleanError = new Error(message ? message : originalError.message);
-    cleanError.name = originalError.name;
-    delete cleanError.stack;
-
-    return cleanError;
-}
+import {isNotFound, isRedirect} from "@tanstack/react-router";
 
 
 /**
@@ -25,18 +17,18 @@ export const errorMiddleware = createMiddleware({ type: "function" }).server(asy
         const results = await next();
         return results;
     }
-    catch (err: any) {
-        if (process.env.NODE_ENV !== "production") {
-            console.error("Error:", err);
+    catch (err) {
+        if (isRedirect(err) || isNotFound(err) || err instanceof FormattedError) {
+            throw err;
         }
-        if (err instanceof FormattedError) {
-            throw createCleanError(err);
-        }
-        else if (err instanceof z.ZodError) {
-            throw createCleanError(err, "A Validation error occurred. Please try again later.");
+
+        console.error("Error:", err);
+
+        if (err instanceof z.ZodError) {
+            throw new Error("A Validation error occurred. Please try again later.", { cause: err });
         }
         else {
-            throw createCleanError(err, "An Unexpected error occurred. Please try again later.");
+            throw new Error("An Unexpected error occurred. Please try again later.", { cause: err });
         }
     }
 });

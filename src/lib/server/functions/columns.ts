@@ -47,38 +47,42 @@ export const updateColumn = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(updateColumnSchema)
     .handler(async ({ data, context: { currentUser } }) => {
-        const targetBoard = await db.query.boards.findFirst({
-            where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id))
+        const targetColumn = await db.query.columns.findFirst({
+            where: eq(s.columns.id, data.id),
+            with: { board: true },
         });
 
-        if (!targetBoard) {
+        if (!targetColumn || targetColumn.board.userId !== currentUser.id) {
             throw notFound();
         }
 
+        const { id, ...updates } = data;
+
         await db
             .update(s.columns)
-            .set({ ...data })
-            .where(eq(s.columns.id, data.id));
+            .set(updates)
+            .where(and(eq(s.columns.id, id), eq(s.columns.boardId, targetColumn.boardId)));
 
-        await touchBoard(data.boardId);
+        await touchBoard(targetColumn.boardId);
     });
 
 
-export const deleteColumn = createServerFn({ method: "GET" })
+export const deleteColumn = createServerFn({ method: "POST" })
     .middleware([authMiddleware])
     .validator(deleteColumnSchema)
-    .handler(async ({ data, context: { currentUser } }) => {
-        const targetBoard = await db.query.boards.findFirst({
-            where: and(eq(s.boards.id, data.boardId), eq(s.boards.userId, currentUser.id))
+    .handler(async ({ data: { id }, context: { currentUser } }) => {
+        const targetColumn = await db.query.columns.findFirst({
+            where: eq(s.columns.id, id),
+            with: { board: true },
         });
 
-        if (!targetBoard) {
+        if (!targetColumn || targetColumn.board.userId !== currentUser.id) {
             throw notFound();
         }
 
         await db
             .delete(s.columns)
-            .where(eq(s.columns.id, data.id));
+            .where(and(eq(s.columns.id, id), eq(s.columns.boardId, targetColumn.boardId)));
 
-        await touchBoard(data.boardId);
+        await touchBoard(targetColumn.boardId);
     });
