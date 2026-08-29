@@ -110,8 +110,8 @@ export const Card = (props: CardProps) => {
 
     const onMoveToColHandler = (targetColumn: ColumnWithCards) => {
         const sortedTargetCards = [...targetColumn.cards].sort((a, b) => a.order - b.order);
-        const lastOrder = sortedTargetCards[sortedTargetCards.length - 1]?.order ?? 0;
-        moveCard(lastOrder + 1, targetColumn.id);
+        const firstOrder = sortedTargetCards[0]?.order ?? 0;
+        moveCard(firstOrder - 1, targetColumn.id);
     };
 
     const onDeleteHandler = () => {

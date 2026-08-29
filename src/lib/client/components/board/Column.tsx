@@ -144,7 +144,7 @@ export const Column = (props: ColumnProps) => {
                 data: {
                     id: transfer.id,
                     columnId: col.id,
-                    order: (sortedCards[sortedCards.length - 1]?.order ?? 0) + 1,
+                    order: (sortedCards[0]?.order ?? 0) - 1,
                 },
             })
 
