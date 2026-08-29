@@ -4,9 +4,9 @@ import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
-import {ArrowDown, ArrowDownToLine, ArrowUp, ArrowUpToLine, MessageSquareMore, MoreVertical} from "lucide-react";
 import {CardTransferType, CardType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
-import {useDeleteCardMutation, useUpdateCardOrderMutation} from "~/lib/client/react-query/mutations";
+import {useDeleteCardMutation, useMoveCardMutation} from "~/lib/client/react-query/mutations";
+import {ArrowDown, ArrowDownToLine, ArrowUp, ArrowUpToLine, MessageSquareMore, MoreVertical} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -23,42 +23,32 @@ import {
 interface CardProps {
     card: CardType,
     columnId: number;
-    firstCardOrder: number;
-    lastCardOrder: number;
-    nextOrder: number;
-    nextNextOrder: number;
-    previousOrder: number;
-    nextCardOrder?: number;
+    nextCardId?: number;
     ref: Ref<HTMLLIElement>;
+    previousCardId?: number;
     columns: ColumnWithCards[];
-    previousCardOrder?: number;
-    previousPreviousOrder: number;
 }
 
 
-export const Card = (props: CardProps) => {
-    const { card, columns, columnId, firstCardOrder, lastCardOrder, nextOrder, nextCardOrder, nextNextOrder, previousOrder, previousCardOrder, previousPreviousOrder, ref } = props;
-
+export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref }: CardProps) => {
+    const moveCardMutation = useMoveCardMutation(card.boardId);
     const deleteCardMutation = useDeleteCardMutation(card.boardId);
-    const updateCardOrderMutation = useUpdateCardOrderMutation(card.boardId);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const isPending = updateCardOrderMutation.isPending || deleteCardMutation.isPending;
+    const isPending = moveCardMutation.isPending || deleteCardMutation.isPending;
     const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">("none");
 
     const onDropHandler = (ev: React.DragEvent) => {
         ev.stopPropagation();
 
         const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null") as CardTransferType;
-        if (!transfer) return;
+        if (!transfer || acceptDrop === "none") return;
 
-        const droppedOrder = (acceptDrop === "top") ? previousOrder : nextOrder;
-        const moveOrder = (droppedOrder + card.order) / 2;
-
-        updateCardOrderMutation.mutate({
+        moveCardMutation.mutate({
             data: {
+                columnId,
                 id: transfer.id,
-                order: moveOrder,
-                columnId: columnId,
+                targetCardId: card.id,
+                placement: acceptDrop === "top" ? "before" : "after",
             }
         });
 
@@ -70,8 +60,10 @@ export const Card = (props: CardProps) => {
 
         ev.preventDefault();
         ev.stopPropagation();
+
         const rect = ev.currentTarget.getBoundingClientRect();
         const midpoint = (rect.top + rect.bottom) / 2;
+
         setAcceptDrop(ev.clientY <= midpoint ? "top" : "bottom");
     };
 
@@ -80,6 +72,7 @@ export const Card = (props: CardProps) => {
 
         const data: CardTransferType = { id: card.id, title: card.title };
         ev.dataTransfer.setData(CONTENT_TYPES.card, JSON.stringify(data));
+
         ev.stopPropagation();
     };
 
@@ -91,10 +84,10 @@ export const Card = (props: CardProps) => {
         ev.stopPropagation();
     };
 
-    const moveCard = (order: number, targetColumnId = columnId) => {
-        updateCardOrderMutation.mutate({
+    const moveCard = (placement: "start" | "end", targetColumnId = columnId) => {
+        moveCardMutation.mutate({
             data: {
-                order,
+                placement,
                 id: card.id,
                 columnId: targetColumnId,
             }
@@ -102,19 +95,31 @@ export const Card = (props: CardProps) => {
     };
 
     const onMoveUpHandler = () => {
-        if (previousCardOrder === undefined) return;
-        moveCard((previousPreviousOrder + previousCardOrder) / 2);
+        if (previousCardId === undefined) return;
+        moveCardMutation.mutate({
+            data: {
+                columnId,
+                id: card.id,
+                placement: "before",
+                targetCardId: previousCardId,
+            },
+        });
     };
 
     const onMoveDownHandler = () => {
-        if (nextCardOrder === undefined) return;
-        moveCard((nextCardOrder + nextNextOrder) / 2);
+        if (nextCardId === undefined) return;
+        moveCardMutation.mutate({
+            data: {
+                columnId,
+                id: card.id,
+                placement: "after",
+                targetCardId: nextCardId,
+            },
+        });
     };
 
     const onMoveToColHandler = (targetColumn: ColumnWithCards) => {
-        const sortedTargetCards = [...targetColumn.cards].sort((a, b) => a.order - b.order);
-        const firstOrder = sortedTargetCards[0]?.order ?? 0;
-        moveCard(firstOrder - 1, targetColumn.id);
+        moveCard("start", targetColumn.id);
     };
 
     const onDeleteHandler = () => {
@@ -138,8 +143,8 @@ export const Card = (props: CardProps) => {
                 )}
             >
                 <div
-                    draggable
                     role="button"
+                    draggable={!isPending}
                     onClick={openEditDialog}
                     onDragStart={onDragStartHandler}
                     className="bg-card cursor-pointer text-sm rounded-md px-3 py-2 relative group min-h-15"
@@ -167,9 +172,9 @@ export const Card = (props: CardProps) => {
                                 size="sm"
                                 variant="ghost"
                                 title="Card options"
+                                onClick={(ev) => ev.stopPropagation()}
                                 onPointerDown={(ev) => ev.stopPropagation()}
                                 className="absolute top-1 right-0.5 opacity-60 hover:opacity-80 has-[>svg]:px-1.5"
-                                onClick={(ev) => ev.stopPropagation()}
                             >
                                 <MoreVertical className="size-4"/>
                             </Button>
@@ -183,20 +188,20 @@ export const Card = (props: CardProps) => {
                             <DropdownMenuSeparator/>
                             <DropdownMenuGroup>
                                 <DropdownMenuItem
-                                    onSelect={() => moveCard(firstCardOrder - 1)}
-                                    disabled={isPending || previousCardOrder === undefined}
+                                    onSelect={() => moveCard("start")}
+                                    disabled={isPending || previousCardId === undefined}
                                 >
                                     <ArrowUpToLine/> Move to Top
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={onMoveUpHandler} disabled={isPending || previousCardOrder === undefined}>
+                                <DropdownMenuItem onSelect={onMoveUpHandler} disabled={isPending || previousCardId === undefined}>
                                     <ArrowUp/> Move Up
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={onMoveDownHandler} disabled={isPending || nextCardOrder === undefined}>
+                                <DropdownMenuItem onSelect={onMoveDownHandler} disabled={isPending || nextCardId === undefined}>
                                     <ArrowDown/> Move Down
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    onSelect={() => moveCard(lastCardOrder + 1)}
-                                    disabled={isPending || nextCardOrder === undefined}
+                                    onSelect={() => moveCard("end")}
+                                    disabled={isPending || nextCardId === undefined}
                                 >
                                     <ArrowDownToLine/> Move to Bottom
                                 </DropdownMenuItem>

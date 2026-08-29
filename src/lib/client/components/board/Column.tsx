@@ -8,36 +8,33 @@ import {EditableText} from "~/lib/client/components/board/EditableText";
 import {ArrowLeft, ArrowRight, MoreHorizontal, Plus} from "lucide-react";
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {CardTransferType, ColTransferType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
-import {useDeleteColumnMutation, useUpdateCardOrderMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
+import {useDeleteColumnMutation, useMoveCardMutation, useMoveColumnMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
 interface ColumnProps {
-    nextOrder: number;
     col: ColumnWithCards;
-    nextNextOrder: number;
-    previousOrder: number;
-    nextColumnOrder?: number;
+    nextColumnId?: number;
+    previousColumnId?: number;
     columns: ColumnWithCards[];
-    previousColumnOrder?: number;
-    previousPreviousOrder: number;
     ref: React.Ref<HTMLDivElement>;
 }
 
 
-export const Column = (props: ColumnProps) => {
-    const { ref, col, columns, previousOrder, previousColumnOrder, previousPreviousOrder, nextOrder, nextColumnOrder, nextNextOrder } = props;
-
+export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: ColumnProps) => {
     const didMountRef = useRef(false);
     const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
     const [newCardEdit, setNewCardEdit] = useState(false);
+    const [acceptCardDrop, setAcceptCardDrop] = useState(false);
+    const [acceptColDrop, setAcceptColDrop] = useState<"none" | "left" | "right">("none");
+
+    const moveCardMutation = useMoveCardMutation(col.boardId);
+    const moveColumnMutation = useMoveColumnMutation(col.boardId);
     const deleteColumnMutation = useDeleteColumnMutation(col.boardId);
     const updateColumnMutation = useUpdateColumnMutation(col.boardId);
-    const [acceptCardDrop, setAcceptCardDrop] = useState(false);
-    const updateCardOrderMutation = useUpdateCardOrderMutation(col.boardId);
-    const isColumnPending = updateColumnMutation.isPending || deleteColumnMutation.isPending;
-    const [acceptColDrop, setAcceptColDrop] = useState<"none" | "left" | "right">("none");
+
+    const isColumnPending = updateColumnMutation.isPending || moveColumnMutation.isPending || deleteColumnMutation.isPending;
 
     useEffect(() => {
         didMountRef.current = true;
@@ -54,12 +51,15 @@ export const Column = (props: ColumnProps) => {
 
     const onDropHandler = (ev: React.DragEvent) => {
         const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.column) || "null") as ColTransferType;
-        if (!transfer) return;
+        if (!transfer || acceptColDrop === "none") return;
 
-        const droppedOrder = (acceptColDrop === "left") ? previousOrder : nextOrder;
-        const moveOrder = (droppedOrder + col.order) / 2;
-
-        updateColumnMutation.mutate({ data: { id: transfer.id, order: moveOrder } });
+        moveColumnMutation.mutate({
+            data: {
+                id: transfer.id,
+                targetColumnId: col.id,
+                placement: acceptColDrop === "left" ? "before" : "after",
+            },
+        });
         setAcceptColDrop("none");
     }
 
@@ -68,8 +68,10 @@ export const Column = (props: ColumnProps) => {
 
         ev.preventDefault();
         ev.stopPropagation();
+
         const rect = ev.currentTarget.getBoundingClientRect();
         const midpoint = (rect.left + rect.right) / 2;
+
         setAcceptColDrop(ev.clientX <= midpoint ? "left" : "right");
     }
 
@@ -83,18 +85,18 @@ export const Column = (props: ColumnProps) => {
         updateColumnMutation.mutate({ data: { id: col.id, name: newName } });
     }
 
-    const moveColumn = (order: number) => {
-        updateColumnMutation.mutate({ data: { order, id: col.id } });
-    };
-
     const onMoveLeftHandler = () => {
-        if (previousColumnOrder === undefined) return;
-        moveColumn((previousPreviousOrder + previousColumnOrder) / 2);
+        if (previousColumnId === undefined) return;
+        moveColumnMutation.mutate({
+            data: { id: col.id, targetColumnId: previousColumnId, placement: "before" },
+        });
     };
 
     const onMoveRightHandler = () => {
-        if (nextColumnOrder === undefined) return;
-        moveColumn((nextColumnOrder + nextNextOrder) / 2);
+        if (nextColumnId === undefined) return;
+        moveColumnMutation.mutate({
+            data: { id: col.id, targetColumnId: nextColumnId, placement: "after" },
+        });
     };
 
     const onAddCardClickHandler = () => {
@@ -121,14 +123,7 @@ export const Column = (props: ColumnProps) => {
             const transfer = JSON.parse(ev.dataTransfer.getData(CONTENT_TYPES.card) || "null") as CardTransferType;
             if (!transfer) return;
 
-            updateCardOrderMutation.mutate({
-                data: {
-                    id: transfer.id,
-                    columnId: col.id,
-                    order: (sortedCards[0]?.order ?? 0) - 1,
-                },
-            })
-
+            moveCardMutation.mutate({ data: { id: transfer.id, columnId: col.id, placement: "start" } })
             setAcceptCardDrop(false);
         },
         onDragLeave: () => {
@@ -154,11 +149,9 @@ export const Column = (props: ColumnProps) => {
             <div
                 onDragStart={onDragStartHandler}
                 {...(col.cards.length ? {} : cardDndProps)}
-                draggable={!colNameEditState[0] && !deleteColumnMutation.isPending}
-                className={cn(
-                    "shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
-                    acceptCardDrop && `outline-2 outline-cyan-900`)
-                }
+                draggable={!colNameEditState[0] && !isColumnPending}
+                className={cn("shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
+                    acceptCardDrop && `outline-2 outline-cyan-900`)}
             >
                 <div className="p-2 flex justify-between" {...(col.cards.length ? cardDndProps : {})}>
                     <EditableText
@@ -184,10 +177,10 @@ export const Column = (props: ColumnProps) => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem onSelect={onMoveLeftHandler} disabled={isColumnPending || previousColumnOrder === undefined}>
+                            <DropdownMenuItem onSelect={onMoveLeftHandler} disabled={isColumnPending || previousColumnId === undefined}>
                                 <ArrowLeft className="size-4"/> Move Left
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={onMoveRightHandler} disabled={isColumnPending || nextColumnOrder === undefined}>
+                            <DropdownMenuItem onSelect={onMoveRightHandler} disabled={isColumnPending || nextColumnId === undefined}>
                                 <ArrowRight className="size-4"/> Move Right
                             </DropdownMenuItem>
                             <DropdownMenuSeparator/>
@@ -209,14 +202,8 @@ export const Column = (props: ColumnProps) => {
                             key={card.id}
                             columns={columns}
                             columnId={col.id}
-                            firstCardOrder={cards[0].order}
-                            lastCardOrder={cards[cards.length - 1].order}
-                            nextCardOrder={cards[idx + 1]?.order}
-                            previousCardOrder={cards[idx - 1]?.order}
-                            previousOrder={cards[idx - 1] ? cards[idx - 1].order : 0}
-                            previousPreviousOrder={cards[idx - 2] ? cards[idx - 2].order : 0}
-                            nextOrder={cards[idx + 1] ? cards[idx + 1].order : card.order + 1}
-                            nextNextOrder={cards[idx + 2] ? cards[idx + 2].order : (cards[idx + 1]?.order ?? card.order) + 1}
+                            nextCardId={cards[idx + 1]?.id}
+                            previousCardId={cards[idx - 1]?.id}
                         />
                     )}
                 </ul>
@@ -225,7 +212,6 @@ export const Column = (props: ColumnProps) => {
                         columnId={col.id}
                         boardId={col.boardId}
                         onComplete={() => setNewCardEdit(false)}
-                        nextOrder={col.cards.length === 0 ? 1 : col.cards[col.cards.length - 1].order + 1}
                     />
                     :
                     <div className="p-3" {...(col.cards.length ? cardDndProps : {})}>

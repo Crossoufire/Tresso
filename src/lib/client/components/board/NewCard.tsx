@@ -9,12 +9,11 @@ import {useCreateCardMutation} from "~/lib/client/react-query/mutations";
 interface NewCardProps {
     boardId: number;
     columnId: number;
-    nextOrder: number;
     onComplete: () => void;
 }
 
 
-export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardProps) {
+export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
     const formRef = useRef<HTMLFormElement>(null);
     const createCardMutation = useCreateCardMutation(boardId);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -32,7 +31,6 @@ export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardPro
             data: {
                 boardId,
                 columnId,
-                order: nextOrder,
                 title: formData.get("title") as string,
             }
         });
@@ -60,7 +58,6 @@ export function NewCard({ columnId, boardId, nextOrder, onComplete }: NewCardPro
                     boardId,
                     columnId,
                     title: value,
-                    order: nextOrder,
                 },
             });
             if (textAreaRef.current) {

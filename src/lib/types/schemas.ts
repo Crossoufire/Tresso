@@ -13,7 +13,13 @@ const columnSchema = z.object({
 
 export const createColumnSchema = columnSchema.pick({ name: true, boardId: true });
 
-export const updateColumnSchema = columnSchema.partial().required({ id: true }).omit({ boardId: true });
+export const updateColumnSchema = columnSchema.pick({ id: true, name: true, archived: true }).partial().required({ id: true });
+
+export const moveColumnSchema = z.object({
+    id: z.number(),
+    targetColumnId: z.number(),
+    placement: z.enum(["before", "after"]),
+});
 
 export const deleteColumnSchema = columnSchema.pick({ id: true });
 
@@ -49,9 +55,16 @@ const cardSchema = z.object({
     content: z.string().optional(),
 });
 
-export const createCardSchema = cardSchema.omit({ id: true });
+export const createCardSchema = cardSchema.omit({ id: true, order: true });
 
-export const updateCardSchema = cardSchema.pick({ id: true, order: true, columnId: true });
+const moveCardBaseSchema = cardSchema.pick({ id: true, columnId: true });
+
+export const moveCardSchema = z.discriminatedUnion("placement", [
+    moveCardBaseSchema.extend({ placement: z.literal("start") }),
+    moveCardBaseSchema.extend({ placement: z.literal("end") }),
+    moveCardBaseSchema.extend({ placement: z.literal("before"), targetCardId: z.number() }),
+    moveCardBaseSchema.extend({ placement: z.literal("after"), targetCardId: z.number() }),
+]);
 
 export const deleteCardSchema = cardSchema.pick({ id: true });
 

@@ -1,9 +1,9 @@
 import {useMutation, useQueryClient,} from "@tanstack/react-query";
 import {createBoard, deleteBoard, updateBoard} from "~/lib/server/functions/boards";
 import {createLabel, deleteLabel, updateLabel} from "~/lib/server/functions/labels";
-import {createColumn, deleteColumn, updateColumn} from "~/lib/server/functions/columns";
 import {boardDetailsOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
-import {addLabelToCard, createCard, deleteCard, removeLabelFromCard, updateCardContent, updateCardOrder, updateCardTitle} from "~/lib/server/functions/cards";
+import {createColumn, deleteColumn, moveColumn, updateColumn} from "~/lib/server/functions/columns";
+import {addLabelToCard, createCard, deleteCard, moveCard, removeLabelFromCard, updateCardContent, updateCardTitle} from "~/lib/server/functions/cards";
 
 
 const invalidateBoardsList = (queryClient: ReturnType<typeof useQueryClient>) => {
@@ -93,6 +93,33 @@ export const useUpdateColumnMutation = (boardId: number) => {
 };
 
 
+export const useMoveColumnMutation = (boardId: number) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: moveColumn,
+        onSuccess: (positions) => {
+            const positionsById = new Map(positions.map((position) => [position.id, position.order]));
+
+            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
+                if (!oldData) return;
+                return {
+                    ...oldData,
+                    columns: oldData.columns.map((column) => {
+                        const order = positionsById.get(column.id);
+                        return order === undefined ? column : { ...column, order };
+                    }),
+                };
+            });
+        },
+        onSettled: () => {
+            invalidateBoardsList(queryClient);
+            return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
+        },
+    });
+};
+
+
 export const useDeleteColumnMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
@@ -131,19 +158,22 @@ export const useCreateCardMutation = (boardId: number) => {
 };
 
 
-export const useUpdateCardOrderMutation = (boardId: number) => {
+export const useMoveCardMutation = (boardId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: updateCardOrder,
-        onMutate: async (variables) => {
-            await queryClient.cancelQueries();
+        mutationFn: moveCard,
+        onSuccess: (positions) => {
+            const positionsById = new Map(positions.map((position) => [position.id, position]));
 
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.id ? { ...card, ...variables.data } : card),
+                    cards: oldData.cards.map((card) => {
+                        const position = positionsById.get(card.id);
+                        return position ? { ...card, ...position } : card;
+                    }),
                 }
             })
         },
