@@ -287,6 +287,10 @@ export const useUpdateLabelMutation = () => {
                 return {
                     ...oldData,
                     labels: oldData.labels.map((label) => label.id === data.id ? data : label),
+                    cards: oldData.cards.map((card) => ({
+                        ...card,
+                        labels: card.labels.map((label) => label.id === data.id ? data : label),
+                    })),
                 };
             });
         },
