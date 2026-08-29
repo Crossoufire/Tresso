@@ -38,46 +38,49 @@ export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete,
     };
 
     return (
-        <div className="p-4 space-y-4">
+        <div className="flex flex-col gap-3 p-3">
             <div className="flex items-center justify-between">
-                <h4 className="font-medium text-sm">Select Labels</h4>
+                <div className="flex flex-col gap-0.5">
+                    <h4 className="text-sm font-medium">Labels</h4>
+                    <p className="text-xs text-muted-foreground">Select or manage board labels.</p>
+                </div>
                 <Button size="sm" variant="outline" onClick={onStartCreate}>
-                    <Plus className="size-4"/> New
+                    <Plus data-icon="inline-start"/> New
                 </Button>
             </div>
             <ScrollArea className="h-48">
-                <div className="space-y-1">
+                <div className="flex flex-col gap-1 pr-2">
                     {(boardLabels && boardLabels.length > 0) ?
                         boardLabels.map((label) => {
                             const checkboxId = `label-checkbox-${label.id}`;
                             
                             return (
-                                <div key={label.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
-                                    <div className="flex items-center gap-2 flex-1">
+                                <div key={label.id} className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-muted/50">
+                                    <div className="flex flex-1 items-center gap-2">
                                         <Checkbox
                                             id={checkboxId}
                                             checked={card.labels.some((l) => l.id === label.id)}
                                             onCheckedChange={(value) => toggleLabelCardHandler(value, label)}
                                         />
-                                        <Label htmlFor={checkboxId} className="flex-1 font-normal cursor-pointer select-none">
-                                            <div className="size-3 rounded shrink-0" style={{ backgroundColor: label.color }}/>
-                                            <div className="text-sm">{label.name}</div>
+                                        <Label htmlFor={checkboxId} className="flex-1 cursor-pointer font-normal select-none">
+                                            <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: label.color }}/>
+                                            <span className="truncate text-sm">{label.name}</span>
                                         </Label>
                                     </div>
-                                    <div className="flex gap-1">
-                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => onStartEdit(label)}>
-                                            <Edit2 className="h-2.5 w-2.5"/>
+                                    <div className="flex gap-0.5">
+                                        <Button size="icon-xs" variant="ghost" aria-label={`Edit ${label.name}`} onClick={() => onStartEdit(label)}>
+                                            <Edit2/>
                                         </Button>
-                                        <Button size="sm" variant="ghost" disabled={isPending} onClick={() => onDelete(label.id)}
-                                                className="h-6 w-6 p-0 text-destructive hover:text-destructive">
-                                            <Trash2 className="h-2.5 w-2.5"/>
+                                        <Button size="icon-xs" variant="ghost" disabled={isPending} aria-label={`Delete ${label.name}`} onClick={() => onDelete(label.id)}
+                                                className="text-destructive hover:text-destructive">
+                                            <Trash2/>
                                         </Button>
                                     </div>
                                 </div>
                             );
                         })
                         :
-                        <div className="text-sm text-muted-foreground">
+                        <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">
                             No labels found on this board.
                         </div>
                     }

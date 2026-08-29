@@ -1,6 +1,8 @@
 import {flushSync} from "react-dom";
 import React, {useRef} from "react";
+import {Input} from "~/lib/client/components/ui/input";
 import {Button} from "~/lib/client/components/ui/button";
+import {Textarea} from "~/lib/client/components/ui/textarea";
 
 
 interface EditableTextProps {
@@ -63,9 +65,10 @@ export function EditableText({ fieldName, value, inputClass, buttonClass, multil
         if (multiline) {
             return (
                 <form onSubmit={onSubmitHandler}>
-                    <textarea
+                    <Textarea
                         required={true}
                         name={fieldName}
+                        maxLength={200}
                         ref={textAreaRef}
                         defaultValue={value}
                         className={inputClass}
@@ -78,11 +81,12 @@ export function EditableText({ fieldName, value, inputClass, buttonClass, multil
 
         return (
             <form onSubmit={onSubmitHandler}>
-                <input
+                <Input
                     type="text"
                     ref={inputRef}
                     required={true}
                     name={fieldName}
+                    maxLength={100}
                     defaultValue={value}
                     className={inputClass}
                     onBlur={onBlurHandler}
@@ -95,6 +99,7 @@ export function EditableText({ fieldName, value, inputClass, buttonClass, multil
     return (
         <Button
             ref={buttonRef}
+            type="button"
             variant="ghost"
             className={buttonClass}
             onClick={onButtonClickHandler}

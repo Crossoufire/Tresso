@@ -4,9 +4,10 @@ import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
+import {DeleteConfirmationDialog} from "~/lib/client/components/DeleteConfirmationDialog";
 import {CardTransferType, CardType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteCardMutation, useMoveCardMutation} from "~/lib/client/react-query/mutations";
-import {ArrowDown, ArrowDownToLine, ArrowUp, ArrowUpToLine, MessageSquareMore, MoreVertical} from "lucide-react";
+import {ArrowDown, ArrowDownToLine, ArrowUp, ArrowUpToLine, Ellipsis, MessageSquareMore, Pencil, Trash2} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -34,8 +35,10 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
     const moveCardMutation = useMoveCardMutation(card.boardId);
     const deleteCardMutation = useDeleteCardMutation(card.boardId);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const isPending = moveCardMutation.isPending || deleteCardMutation.isPending;
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [acceptDrop, setAcceptDrop] = useState<"none" | "top" | "bottom">("none");
+
+    const isPending = moveCardMutation.isPending || deleteCardMutation.isPending;
 
     const onDropHandler = (ev: React.DragEvent) => {
         ev.stopPropagation();
@@ -123,10 +126,11 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
     };
 
     const onDeleteHandler = () => {
-        if (!window.confirm("Are you sure to delete this card?")) return;
-
         deleteCardMutation.mutate({ data: { id: card.id } }, {
-            onSuccess: () => toast.success("Card successfully deleted"),
+            onSuccess: () => {
+                setIsDeleteDialogOpen(false);
+                toast.success("Card successfully deleted");
+            },
         });
     };
 
@@ -137,73 +141,83 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
                 onDrop={onDropHandler}
                 onDragOver={onDragOverHandler}
                 onDragLeave={() => setAcceptDrop("none")}
-                className={cn("border-t-2 border-b-2 border-t-transparent border-b-transparent -mb-0.5 last:mb-0 px-2 py-1",
-                    acceptDrop === "top" ? "border-t-cyan-700 border-b-transparent" :
-                        acceptDrop === "bottom" ? "border-b-cyan-700 border-t-transparent" : ""
+                className={cn("-mb-px border-y-2 border-transparent px-1.5 py-1",
+                    acceptDrop === "top" ? "border-t-foreground/55 border-b-transparent" :
+                        acceptDrop === "bottom" ? "border-b-foreground/55 border-t-transparent" : ""
                 )}
             >
                 <div
-                    role="button"
                     draggable={!isPending}
-                    onClick={openEditDialog}
                     onDragStart={onDragStartHandler}
-                    className="bg-card cursor-pointer text-sm rounded-md px-3 py-2 relative group min-h-15"
+                    className="group relative min-h-16 rounded-lg bg-background/75 text-sm ring-1 ring-foreground/8 transition-colors
+                    hover:bg-background"
                 >
-                    <div className="pr-5 flex flex-col h-full">
-                        {card.labels.length > 0 &&
-                            <div className="flex flex-wrap gap-1 mb-2">
-                                {card.labels.map((label) =>
-                                    <Badge key={label.id} style={{ backgroundColor: label.color }} className="py-0">
-                                        {label.name}
-                                    </Badge>
-                                )}
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={openEditDialog}
+                        className="block h-auto min-h-16 w-full rounded-lg px-3 py-3 pr-9 text-left font-normal whitespace-normal
+                        hover:bg-transparent focus-visible:ring-2"
+                    >
+                        <div className="flex h-full flex-col">
+                            {card.labels.length > 0 &&
+                                <div className="mb-2 flex flex-wrap gap-1">
+                                    {card.labels.map((label) =>
+                                        <Badge key={label.id} style={{ backgroundColor: label.color }} className="h-4 border-0 px-1.5 text-[10px]
+                                        text-black/80 shadow-none">
+                                            {label.name}
+                                        </Badge>
+                                    )}
+                                </div>
+                            }
+                            <h3 className="my-0 leading-5 whitespace-pre-wrap wrap-break-word text-foreground/90">
+                                {card.title}
+                            </h3>
+                            <div className="mt-auto flex grow items-end">
+                                {card.content && <MessageSquareMore className="mt-2 text-muted-foreground"/>}
                             </div>
-                        }
-                        <h3 className="my-0 whitespace-pre-wrap wrap-break-word">
-                            {card.title}
-                        </h3>
-                        <div className="grow flex items-end mt-auto">
-                            {card.content && <MessageSquareMore className="size-4 opacity-70 mt-2"/>}
                         </div>
-                    </div>
+                    </Button>
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                title="Card options"
-                                onClick={(ev) => ev.stopPropagation()}
-                                onPointerDown={(ev) => ev.stopPropagation()}
-                                className="absolute top-1 right-0.5 opacity-60 hover:opacity-80 has-[>svg]:px-1.5"
-                            >
-                                <MoreVertical className="size-4"/>
-                            </Button>
+                        <DropdownMenuTrigger
+                            render={
+                                <Button
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    title="Card options"
+                                    className="absolute top-1.5 right-1.5 text-muted-foreground"
+                                    onClick={(event) => event.stopPropagation()}
+                                    onPointerDown={(event) => event.stopPropagation()}
+                                />
+                            }
+                        >
+                            <Ellipsis/>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={stopCardClick} onPointerDown={stopCardClick}>
                             <DropdownMenuGroup>
-                                <DropdownMenuItem disabled={isPending} onSelect={openEditDialog}>
-                                    Edit Card
+                                <DropdownMenuItem disabled={isPending} onClick={openEditDialog}>
+                                    <Pencil/> Edit card
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator/>
                             <DropdownMenuGroup>
                                 <DropdownMenuItem
-                                    onSelect={() => moveCard("start")}
+                                    onClick={() => moveCard("start")}
                                     disabled={isPending || previousCardId === undefined}
                                 >
-                                    <ArrowUpToLine/> Move to Top
+                                    <ArrowUpToLine/> Move to top
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={onMoveUpHandler} disabled={isPending || previousCardId === undefined}>
-                                    <ArrowUp/> Move Up
+                                <DropdownMenuItem onClick={onMoveUpHandler} disabled={isPending || previousCardId === undefined}>
+                                    <ArrowUp/> Move up
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={onMoveDownHandler} disabled={isPending || nextCardId === undefined}>
-                                    <ArrowDown/> Move Down
+                                <DropdownMenuItem onClick={onMoveDownHandler} disabled={isPending || nextCardId === undefined}>
+                                    <ArrowDown/> Move down
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    onSelect={() => moveCard("end")}
+                                    onClick={() => moveCard("end")}
                                     disabled={isPending || nextCardId === undefined}
                                 >
-                                    <ArrowDownToLine/> Move to Bottom
+                                    <ArrowDownToLine/> Move to bottom
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSub>
@@ -215,7 +229,7 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
                                         {columns
                                             .filter((targetColumn) => targetColumn.id !== columnId)
                                             .map((targetColumn) =>
-                                                <DropdownMenuItem key={targetColumn.id} onSelect={() => onMoveToColHandler(targetColumn)}>
+                                                <DropdownMenuItem key={targetColumn.id} onClick={() => onMoveToColHandler(targetColumn)}>
                                                     <span className="truncate">{targetColumn.name}</span>
                                                 </DropdownMenuItem>
                                             )
@@ -227,10 +241,10 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
                             <DropdownMenuGroup>
                                 <DropdownMenuItem
                                     disabled={isPending}
-                                    onSelect={onDeleteHandler}
-                                    className="text-destructive focus:text-destructive cursor-pointer"
+                                    onClick={() => setIsDeleteDialogOpen(true)}
+                                    variant="destructive"
                                 >
-                                    Delete Card
+                                    <Trash2/> Delete card
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                         </DropdownMenuContent>
@@ -241,6 +255,14 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
                 card={card}
                 isDialogOpen={isEditDialogOpen}
                 setDialogOpen={setIsEditDialogOpen}
+            />
+            <DeleteConfirmationDialog
+                open={isDeleteDialogOpen}
+                title="Delete this card?"
+                isPending={deleteCardMutation.isPending}
+                onConfirm={onDeleteHandler}
+                onOpenChange={setIsDeleteDialogOpen}
+                description={`“${card.title}” will be permanently deleted.`}
             />
         </>
     );

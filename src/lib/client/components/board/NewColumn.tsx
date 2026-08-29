@@ -20,7 +20,7 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
     const [editing, setEditing] = useState(editInitially);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const cardRef = (ev: HTMLDivElement) => {
+    const cardRef = (ev: HTMLDivElement | null) => {
         if (!ev) return;
         onExpand();
     }
@@ -44,10 +44,10 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
         <>
             {editing ?
                 <form onSubmit={onSubmitHandler}>
-                    <Card className="min-w-72 ml-3" ref={cardRef}>
+                    <Card className="w-80 bg-card/85 backdrop-blur-sm" ref={cardRef}>
                         <CardHeader>
-                            <CardTitle>Add Column</CardTitle>
-                            <CardDescription>Add a new column to this board</CardDescription>
+                            <CardTitle>Add column</CardTitle>
+                            <CardDescription>Create another stage for this workflow.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Input
@@ -56,24 +56,26 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
                                 type="text"
                                 ref={inputRef}
                                 name="columnName"
+                                maxLength={100}
                                 autoComplete="off"
-                                placeholder="Enter a name..."
+                                placeholder="e.g. In review"
                                 disabled={createColMutation.isPending}
                             />
                         </CardContent>
-                        <CardFooter className="flex justify-end items-center gap-3">
-                            <Button variant="destructive" type="button" onClick={() => setEditing(false)} disabled={createColMutation.isPending}>
+                        <CardFooter className="justify-end gap-2">
+                            <Button variant="outline" type="button" onClick={() => setEditing(false)} disabled={createColMutation.isPending}>
                                 Cancel
                             </Button>
-                            <Button variant="default" type="submit" disabled={createColMutation.isPending}>
-                                {createColMutation.isPending ? <Loader2 className="animate-spin"/> : "Add"}
+                            <Button type="submit" disabled={createColMutation.isPending}>
+                                {createColMutation.isPending && <Loader2 data-icon="inline-start" className="animate-spin"/>}
+                                Add column
                             </Button>
                         </CardFooter>
                     </Card>
                 </form>
                 :
-                <Button onClick={() => setEditing(true)} size="sm" className="ml-2">
-                    <Plus/>
+                <Button onClick={() => setEditing(true)} variant="outline" className="w-80 justify-start bg-card/55 text-muted-foreground backdrop-blur-sm">
+                    <Plus data-icon="inline-start"/> Add column
                 </Button>
             }
         </>

@@ -69,13 +69,24 @@ export function LabelManagerPopover({ card }: LabelManagerPopoverProps) {
     };
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen} modal={true}>
-            <PopoverTrigger asChild>
-                <Button size="sm" type="button" variant="outline" className="h-8 w-8 p-0 shrink-0">
-                    <Plus className="h-4 w-4"/>
-                </Button>
+        <Popover open={isOpen} onOpenChange={(open) => {
+            setIsOpen(open);
+            if (!open) dispatch({ type: "RESET" });
+        }} modal={true}>
+            <PopoverTrigger
+                render={
+                    <Button
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        className="shrink-0"
+                        aria-label="Manage labels"
+                    />
+                }
+            >
+                <Plus/>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end" side="top">
+            <PopoverContent className="w-80 gap-0 overflow-hidden p-0" align="end" side="top">
                 {state.mode === "select" &&
                     <LabelSelectionView
                         card={card}

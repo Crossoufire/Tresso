@@ -3,7 +3,7 @@ import authClient from "~/lib/utils/auth-client";
 import {Button} from "~/lib/client/components/ui/button";
 import {createFileRoute, redirect} from "@tanstack/react-router";
 import {authOptions} from "~/lib/client/react-query/query-options";
-import {CheckSquare, LogIn, StretchVertical, Zap} from "lucide-react";
+import {ArrowRight, Columns3, GripVertical, Layers3} from "lucide-react";
 
 
 export const Route = createFileRoute("/")({
@@ -35,80 +35,65 @@ function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br flex flex-col">
-            <header className="p-6">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-linear-to-br from-blue-600 to-cyan-400 rounded-lg flex items-center justify-center">
-                        <StretchVertical className="w-5 h-5 text-white"/>
-                    </div>
-                    <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">
-                        Tresso
+        <main className="relative flex min-h-screen flex-col overflow-hidden">
+            <header className="mx-auto flex w-full max-w-6xl items-center px-6 py-6 lg:px-8">
+                <div className="flex items-center gap-2.5">
+                    <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
+                        <GripVertical/>
                     </span>
+                    <span className="font-heading text-base font-medium tracking-tight">Tresso</span>
                 </div>
             </header>
-            <div className="flex-1 flex items-center justify-center px-6 py-12">
-                <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-8">
-                        <div className="space-y-4">
-                            <h1 className="text-4xl lg:text-5xl font-bold leading-tight">
-                                Organize your work and life with{" "}
-                                <span className="bg-linear-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">
-                                    Tresso
-                                </span>
-                            </h1>
-                            <p className="text-xl text-gray-300 leading-relaxed">
-                                A very simple, powerful way to organize your projects with boards, lists, and cards.
-                                Keep everything structured and get more done.
+
+            <div className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-16 px-6 py-12 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+                <section className="max-w-2xl">
+                    <p className="mb-5 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+                        Work, in clear view
+                    </p>
+                    <h1 className="font-heading text-5xl leading-[0.98] font-medium tracking-[-0.045em] text-balance sm:text-6xl lg:text-7xl">
+                        A quieter place for work in progress.
+                    </h1>
+                    <p className="mt-7 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+                        Shape projects into boards, columns, and cards—then move the work forward without the noise.
+                    </p>
+
+                    <div className="mt-10 grid max-w-xl gap-px overflow-hidden rounded-xl bg-border ring-1 ring-border sm:grid-cols-2">
+                        <div className="flex items-start gap-3 bg-card p-4">
+                            <Columns3 className="mt-0.5 text-muted-foreground"/>
+                            <div className="flex flex-col gap-1">
+                                <p className="text-sm font-medium">Simple structure</p>
+                                <p className="text-xs leading-5 text-muted-foreground">Only the boards and cards your work needs.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 bg-card p-4">
+                            <Layers3 className="mt-0.5 text-muted-foreground"/>
+                            <div className="flex flex-col gap-1">
+                                <p className="text-sm font-medium">Fast movement</p>
+                                <p className="text-xs leading-5 text-muted-foreground">Drag, reorder, and keep priorities visible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="mx-auto w-full max-w-sm rounded-2xl bg-card/80 p-1 ring-1 ring-foreground/10 backdrop-blur-xl">
+                    <div className="flex flex-col gap-7 rounded-[calc(var(--radius)*1.4)] bg-background/45 p-7 sm:p-8">
+                        <div className="flex flex-col gap-2">
+                            <span className="grid size-10 place-items-center rounded-xl bg-secondary ring-1 ring-foreground/8">
+                                <GripVertical/>
+                            </span>
+                            <h2 className="mt-3 font-heading text-xl font-medium tracking-tight">Welcome back</h2>
+                            <p className="text-sm leading-6 text-muted-foreground">
+                                Sign in to open your workspace and continue where you left off.
                             </p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/20">
-                                <div className="w-12 h-12 bg-blue-900/50 rounded-lg flex items-center justify-center mb-3">
-                                    <CheckSquare className="w-6 h-6 text-blue-400"/>
-                                </div>
-                                <h3 className="font-semibold mb-1">Organize Tasks</h3>
-                                <p className="text-sm text-gray-300">Create boards, lists, and cards to structure your work</p>
-                            </div>
-                            <div className="flex flex-col items-center text-center p-4 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/20">
-                                <div className="w-12 h-12 bg-purple-900/50 rounded-lg flex items-center justify-center mb-3">
-                                    <Zap className="w-6 h-6 text-purple-400"/>
-                                </div>
-                                <h3 className="font-semibold mb-1">Stay Productive</h3>
-                                <p className="text-sm text-gray-300">Drag, drop, and prioritize with ease</p>
-                            </div>
-                        </div>
+                        <Button size="lg" onClick={handleGoogleSignIn} className="w-full justify-between px-3">
+                            Continue with Google
+                            <ArrowRight data-icon="inline-end"/>
+                        </Button>
+                        <p className="text-center text-xs text-muted-foreground">One account. All of your boards.</p>
                     </div>
-                    <div className="flex justify-center lg:justify-end">
-                        <div className="w-full max-w-md">
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/20 p-8">
-                                <div className="text-center mb-8">
-                                    <div className="w-16 h-16 bg-linear-to-r from-blue-600 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                        <StretchVertical className="w-8 h-8"/>
-                                    </div>
-                                    <h2 className="text-2xl font-bold mb-2">
-                                        Welcome to Tresso
-                                    </h2>
-                                    <p className="text-gray-300">
-                                        Sign in to access your boards and start organizing
-                                    </p>
-                                </div>
-                                <Button
-                                    size="lg"
-                                    onClick={handleGoogleSignIn}
-                                    className="w-full h-12 bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700
-                                    font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                                >
-                                    <LogIn className="w-5 h-5 mr-1"/> Continue with Google
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </section>
             </div>
-
-            <div className="absolute top-30 left-35 w-28 h-28 bg-blue-500/20 rounded-full blur-xl"></div>
-            <div className="absolute top-40 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>
-            <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
-        </div>
+        </main>
     );
 }

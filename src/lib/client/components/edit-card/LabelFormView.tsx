@@ -26,45 +26,50 @@ export function LabelFormView({ mode, initialLabel, onSubmit, onBack, isPending 
         if (mode === "edit" && initialLabel) {
             setName(initialLabel.name);
             setColor(initialLabel.color);
+            return;
         }
+
+        setName("");
+        setColor(LABEL_COLORS[0]);
     }, [mode, initialLabel]);
 
     const handleSubmit = () => {
         if (!name.trim()) return;
-        onSubmit({ name, color });
+        onSubmit({ name: name.trim(), color });
     };
 
     return (
-        <div className="p-4 space-y-4">
-            <h4 className="font-medium text-sm">
+        <div className="flex flex-col gap-4 p-3">
+            <h4 className="text-sm font-medium">
                 {mode === "edit" ? "Edit Label" : "Create Label"}
             </h4>
-            <div className="space-y-3">
-                <div className="space-y-1">
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
                     <Label htmlFor="label-name" className="text-xs">Name</Label>
                     <Input
                         value={name}
                         maxLength={25}
                         id="label-name"
-                        placeholder="Enter label name..."
+                        placeholder="e.g. Urgent"
                         onChange={(ev) => setName(ev.target.value)}
                         onKeyDown={(ev) => ev.key === "Enter" && handleSubmit()}
                     />
                 </div>
-                <div className="space-y-1">
+                <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">Color</Label>
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded border-2 border-gray-200 shrink-0" style={{ backgroundColor: color }}/>
-                        <div className="mb-1">{" "}|{" "}</div>
-                        <div className="grid grid-cols-9 gap-1 flex-1">
+                    <div className="flex items-center gap-3">
+                        <div className="size-7 shrink-0 rounded-lg ring-1 ring-black/20" style={{ backgroundColor: color }}/>
+                        <div className="grid flex-1 grid-cols-9 gap-1">
                             {LABEL_COLORS.map((c) =>
                                 <button
                                     key={c}
                                     type="button"
+                                    aria-label={`Use ${c}`}
+                                    aria-pressed={color === c}
                                     onClick={() => setColor(c)}
                                     style={{ backgroundColor: c }}
-                                    className={`w-4 h-4 rounded border transition-all ${
-                                        color === c ? "border-gray-400 scale-110" : "hover:border-gray-300 border-transparent"
+                                    className={`size-4 rounded-sm ring-1 ring-black/20 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                        color === c ? "scale-110" : "hover:scale-105"
                                     }`}
                                 />
                             )}
@@ -72,12 +77,12 @@ export function LabelFormView({ mode, initialLabel, onSubmit, onBack, isPending 
                     </div>
                 </div>
             </div>
-            <div className="flex gap-2 pt-2 border-t">
+            <div className="flex gap-2 border-t pt-3">
                 <Button size="sm" variant="outline" className="flex-1" onClick={onBack}>
                     Back
                 </Button>
                 <Button size="sm" className="flex-1" onClick={handleSubmit} disabled={!name.trim() || isPending}>
-                    {isPending && <Loader2 className="h-3 w-3 animate-spin mr-1"/>}
+                    {isPending && <Loader2 data-icon="inline-start" className="animate-spin"/>}
                     {mode === "edit" ? "Update" : "Create"}
                 </Button>
             </div>

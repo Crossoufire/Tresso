@@ -8,7 +8,8 @@ import {Field, FieldDescription, FieldGroup, FieldLabel} from "~/lib/client/comp
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "~/lib/client/components/ui/dialog";
 
 
-const DEFAULT_BOARD_COLOR = "#3b82f6";
+const DEFAULT_BOARD_COLOR = "#4f46e5";
+const BOARD_COLORS = ["#4f46e5", "#2563eb", "#0891b2", "#059669", "#ca8a04", "#ea580c", "#dc2626", "#9333ea"];
 
 
 export function CreateBoardDialog() {
@@ -44,14 +45,22 @@ export function CreateBoardDialog() {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button type="button" variant="outline" className="h-40 w-full flex-col gap-3 border-dashed">
-                    <Plus data-icon="inline-start"/>
-                    <span>Create a new board</span>
-                </Button>
+            <DialogTrigger
+                render={
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-48 w-full flex-col gap-3 bg-card/55 text-muted-foreground ring-1 ring-foreground/8 hover:bg-card hover:text-foreground"
+                    />
+                }
+            >
+                <span className="grid size-9 place-items-center rounded-lg bg-secondary ring-1 ring-foreground/8">
+                    <Plus/>
+                </span>
+                <span className="text-sm font-medium">Create board</span>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md" showCloseButton={!createBoardMutation.isPending}>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     <DialogHeader>
                         <DialogTitle>Create board</DialogTitle>
                         <DialogDescription>
@@ -59,7 +68,19 @@ export function CreateBoardDialog() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <FieldGroup className="gap-5">
+                    <div
+                        className="flex h-24 items-end rounded-xl p-4 text-white shadow-sm"
+                        style={{
+                            backgroundColor: color,
+                            backgroundImage: "linear-gradient(145deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.58))",
+                        }}
+                    >
+                        <span className="truncate font-heading text-lg font-medium">
+                            {name.trim() || "Untitled board"}
+                        </span>
+                    </div>
+
+                    <FieldGroup className="gap-4">
                         <Field data-disabled={createBoardMutation.isPending || undefined}>
                             <FieldLabel htmlFor="board-name">Board name</FieldLabel>
                             <Input
@@ -74,28 +95,37 @@ export function CreateBoardDialog() {
                                 onChange={(event) => setName(event.target.value)}
                             />
                             <FieldDescription>
-                                Use a short, recognizable name for this workspace.
+                                Keep it short enough to recognize at a glance.
                             </FieldDescription>
                         </Field>
 
                         <Field data-disabled={createBoardMutation.isPending || undefined}>
                             <FieldLabel htmlFor="board-color">Board color</FieldLabel>
-                            <Input
-                                type="color"
-                                value={color}
-                                id="board-color"
-                                className="h-12"
-                                disabled={createBoardMutation.isPending}
-                                onChange={(event) => setColor(event.target.value)}
-                            />
-                            <FieldDescription className="flex items-center gap-2">
-                                <span
-                                    aria-hidden="true"
-                                    className="size-2 rounded-full"
-                                    style={{ backgroundColor: color }}
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="color"
+                                    value={color}
+                                    id="board-color"
+                                    className="h-8 w-12 shrink-0 cursor-pointer p-1"
+                                    disabled={createBoardMutation.isPending}
+                                    onChange={(event) => setColor(event.target.value)}
                                 />
-                                {color.toUpperCase()} will be used as the board accent.
-                            </FieldDescription>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {BOARD_COLORS.map((boardColor) =>
+                                        <button
+                                            type="button"
+                                            key={boardColor}
+                                            aria-label={`Use ${boardColor}`}
+                                            aria-pressed={color === boardColor}
+                                            disabled={createBoardMutation.isPending}
+                                            onClick={() => setColor(boardColor)}
+                                            style={{ backgroundColor: boardColor }}
+                                            className="size-6 rounded-md ring-1 ring-black/20 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                            <FieldDescription>{color.toUpperCase()} fills the board tile.</FieldDescription>
                         </Field>
                     </FieldGroup>
 

@@ -5,11 +5,12 @@ import {Card} from "~/lib/client/components/board/Card";
 import {Button} from "~/lib/client/components/ui/button";
 import {NewCard} from "~/lib/client/components/board/NewCard";
 import {EditableText} from "~/lib/client/components/board/EditableText";
-import {ArrowLeft, ArrowRight, MoreHorizontal, Plus} from "lucide-react";
+import {DeleteConfirmationDialog} from "~/lib/client/components/DeleteConfirmationDialog";
+import {ChevronLeft, ChevronRight, Ellipsis, Plus, Trash2} from "lucide-react";
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {CardTransferType, ColTransferType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteColumnMutation, useMoveCardMutation, useMoveColumnMutation, useUpdateColumnMutation} from "~/lib/client/react-query/mutations";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 
 
 interface ColumnProps {
@@ -26,6 +27,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
     const listRef = useRef<HTMLUListElement>(null!);
     const colNameEditState = useState(false);
     const [newCardEdit, setNewCardEdit] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [acceptCardDrop, setAcceptCardDrop] = useState(false);
     const [acceptColDrop, setAcceptColDrop] = useState<"none" | "left" | "right">("none");
 
@@ -105,10 +107,11 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
     }
 
     const onDeleteHandler = () => {
-        if (!window.confirm("Are you sure? All the associated cards will also be deleted!")) return;
-
         deleteColumnMutation.mutate({ data: { id: col.id } }, {
-            onSuccess: () => toast.success("Column successfully deleted"),
+            onSuccess: () => {
+                setIsDeleteDialogOpen(false);
+                toast.success("Column successfully deleted");
+            },
         })
     }
 
@@ -132,17 +135,18 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
     };
 
     return (
+        <>
         <div
             ref={ref}
             onDrop={onDropHandler}
             onDragOver={onDragOverHandler}
             onDragLeave={() => setAcceptColDrop("none")}
             className={cn(
-                "border-l-2 border-r-2 border-l-transparent border-r-transparent -mr-0.5 last:mr-0 px-2 shrink-0 flex flex-col max-h-full",
+                "flex max-h-full shrink-0 flex-col border-x-2 border-transparent",
                 acceptColDrop === "left"
-                    ? "border-l-cyan-950 border-r-transparent"
+                    ? "border-l-foreground/55 border-r-transparent"
                     : acceptColDrop === "right"
-                        ? "border-r-cyan-950 border-l-transparent"
+                        ? "border-r-foreground/55 border-l-transparent"
                         : "",
             )}
         >
@@ -150,51 +154,58 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                 onDragStart={onDragStartHandler}
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !isColumnPending}
-                className={cn("shrink-0 flex flex-col max-h-full w-80 rounded-md group bg-gray-800 relative",
-                    acceptCardDrop && `outline-2 outline-cyan-900`)}
+                className={cn(
+                    "group relative flex max-h-full w-80 shrink-0 flex-col overflow-hidden rounded-xl bg-card/85 ring-1 ring-foreground/10 backdrop-blur-sm",
+                    acceptCardDrop && "ring-2 ring-foreground/45",
+                )}
             >
-                <div className="p-2 flex justify-between" {...(col.cards.length ? cardDndProps : {})}>
+                <div className="flex items-center justify-between gap-2 border-b px-3 py-2.5" {...(col.cards.length ? cardDndProps : {})}>
                     <EditableText
                         fieldName="name"
-                        buttonClass="px-2"
+                        buttonClass="h-7 max-w-56 justify-start truncate px-1.5 font-medium"
                         onChange={onChangeColName}
                         editState={colNameEditState}
-                        inputClass="rounded-md py-2 px-2 font-medium text-sm"
+                        inputClass="h-7 w-56 rounded-lg border border-input bg-input/30 px-2 text-sm font-medium outline-none focus:border-ring focus:ring-3 focus:ring-ring/50"
                         value={(updateColumnMutation.isPending && updateColumnMutation.variables.data.name)
                             ? updateColumnMutation.variables.data.name : col.name
                         }
                     />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="opacity-60 hover:opacity-100"
-                                disabled={deleteColumnMutation.isPending}
-                                onPointerDown={(ev) => ev.stopPropagation()}
-                            >
-                                <MoreHorizontal className="size-4"/>
-                            </Button>
+                    <div className="flex items-center gap-1">
+                        <span className="min-w-5 text-center text-xs tabular-nums text-muted-foreground">{sortedCards.length}</span>
+                        <DropdownMenu>
+                        <DropdownMenuTrigger
+                            render={
+                                <Button
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    aria-label={`Options for ${col.name}`}
+                                    disabled={deleteColumnMutation.isPending}
+                                    onPointerDown={(event) => event.stopPropagation()}
+                                />
+                            }
+                        >
+                            <Ellipsis/>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem onSelect={onMoveLeftHandler} disabled={isColumnPending || previousColumnId === undefined}>
-                                <ArrowLeft className="size-4"/> Move Left
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={onMoveRightHandler} disabled={isColumnPending || nextColumnId === undefined}>
-                                <ArrowRight className="size-4"/> Move Right
-                            </DropdownMenuItem>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem onClick={onMoveLeftHandler} disabled={isColumnPending || previousColumnId === undefined}>
+                                    <ChevronLeft/> Move left
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={onMoveRightHandler} disabled={isColumnPending || nextColumnId === undefined}>
+                                    <ChevronRight/> Move right
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
                             <DropdownMenuSeparator/>
-                            <DropdownMenuItem
-                                onSelect={onDeleteHandler}
-                                disabled={isColumnPending}
-                                className="text-destructive focus:text-destructive cursor-pointer"
-                            >
-                                Delete Column
-                            </DropdownMenuItem>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem variant="destructive" onClick={() => setIsDeleteDialogOpen(true)} disabled={isColumnPending}>
+                                    <Trash2/> Delete column
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    </div>
                 </div>
-                <ul ref={listRef} className="grow overflow-auto p-1 mr-1.5">
+                <ul ref={listRef} className="grow overflow-y-auto px-1 py-1.5">
                     {sortedCards.map((card, idx, cards) =>
                         <Card
                             card={card}
@@ -214,13 +225,22 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                         onComplete={() => setNewCardEdit(false)}
                     />
                     :
-                    <div className="p-3" {...(col.cards.length ? cardDndProps : {})}>
-                        <Button onClick={onAddCardClickHandler} disabled={deleteColumnMutation.isPending}>
-                            <Plus/> Add Card
+                    <div className="border-t p-2" {...(col.cards.length ? cardDndProps : {})}>
+                        <Button className="w-full justify-start text-muted-foreground" variant="ghost" onClick={onAddCardClickHandler} disabled={deleteColumnMutation.isPending}>
+                            <Plus data-icon="inline-start"/> Add card
                         </Button>
                     </div>
                 }
             </div>
         </div>
+        <DeleteConfirmationDialog
+            open={isDeleteDialogOpen}
+            title="Delete this column?"
+            isPending={deleteColumnMutation.isPending}
+            onConfirm={onDeleteHandler}
+            onOpenChange={setIsDeleteDialogOpen}
+            description={`“${col.name}” and every card inside it will be permanently deleted.`}
+        />
+        </>
     );
 }

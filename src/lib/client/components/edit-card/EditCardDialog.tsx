@@ -58,42 +58,44 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
             if (!open) cancelContentEdit();
             setDialogOpen(open);
         }}>
-            <DialogContent className="w-125 max-h-[80vh] overflow-y-auto overflow-x-hidden" ref={dialogRef}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto overflow-x-hidden sm:max-w-xl" ref={dialogRef}>
                 <DialogHeader>
-                    <DialogTitle>Edit Card</DialogTitle>
+                    <DialogTitle>Edit card</DialogTitle>
                     <DialogDescription>
-                        Update the card details, content, and manage labels.
+                        Refine the title, description, and labels for this card.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-10">
-                    <div className="space-y-2">
+                <div className="flex flex-col gap-6 py-1">
+                    <div className="flex flex-col gap-2">
                         <Label htmlFor="title">Title</Label>
                         <EditableText
                             multiline={true}
                             fieldName="title"
                             editState={titleEditState}
                             onChange={(value) => updateCardTitleHandler(value)}
-                            inputClass="text-lg px-2 py-2 min-h-24 w-full rounded-md resize-y"
-                            buttonClass="text-lg px-2 py-1 h-full w-full justify-start text-left"
+                            inputClass="min-h-24 w-full resize-y bg-input/30 px-3 py-2 text-base"
+                            buttonClass="h-auto min-h-10 w-full justify-start bg-input/20 px-3 py-2 text-left text-base leading-6 whitespace-pre-wrap ring-1 ring-foreground/8 hover:bg-input/35"
                             value={(updateCardTitleMutation.isPending && updateCardTitleMutation.variables.data.title) ?
                                 updateCardTitleMutation.variables.data.title : card.title
                             }
                         />
                     </div>
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
                         <Label htmlFor="content">Description</Label>
                         {isEditingContent ?
-                            <div>
+                            <div className="flex flex-col gap-2">
                                 <Textarea
                                     id="content"
-                                    className="min-h-50"
-                                    defaultValue={card.content || ""}
+                                    value={newContent}
+                                    maxLength={10000}
+                                    className="min-h-44 resize-y bg-input/30"
                                     placeholder="Enter card description..."
                                     onChange={(ev) => setNewContent(ev.target.value)}
                                 />
-                                <div className="flex gap-2 mt-2">
+                                <div className="flex justify-end gap-2">
                                     <Button
+                                        size="sm"
                                         variant="outline"
                                         onClick={cancelContentEdit}
                                         disabled={updateCardContentMutation.isPending}
@@ -101,32 +103,34 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                         Cancel
                                     </Button>
                                     <Button
+                                        size="sm"
                                         disabled={updateCardContentMutation.isPending}
                                         onClick={() => updateCardContentHandler(newContent)}
                                     >
                                         {updateCardContentMutation.isPending &&
-                                            <LoaderCircle className="animate-spin"/>
+                                            <LoaderCircle data-icon="inline-start" className="animate-spin"/>
                                         } Save
                                     </Button>
                                 </div>
                             </div>
                             :
-                            <Textarea
-                                style={{ resize: "none" }}
-                                defaultValue={card.content || ""}
-                                placeholder="Add a description to this card..."
-                                className="min-h-37.5 max-h-75 text-sm text-muted-foreground hover:bg-muted/50 cursor-pointer"
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="h-auto min-h-28 w-full justify-start bg-input/20 px-3 py-2 text-left leading-6 whitespace-pre-wrap text-muted-foreground ring-1 ring-foreground/8 hover:bg-input/35 hover:text-foreground"
                                 onClick={() => {
                                     setNewContent(card.content || "");
                                     setIsEditingContent(true);
                                 }}
-                            />
+                            >
+                                {card.content || "Add a description to this card…"}
+                            </Button>
                         }
                     </div>
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
                         <Label>Labels</Label>
-                        <div className="flex items-center gap-2 min-h-10 p-2 border rounded-md">
-                            <div className="flex flex-wrap gap-2 flex-1">
+                        <div className="flex min-h-12 items-center gap-2 rounded-lg bg-input/20 p-2.5 ring-1 ring-foreground/8">
+                            <div className="flex flex-1 flex-wrap gap-1.5">
                                 {card.labels.length === 0 ?
                                     <span className="text-sm text-muted-foreground">
                                         No labels assigned.
@@ -135,13 +139,20 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                     card.labels.map((label) =>
                                         <Badge
                                             key={label.id}
-                                            className="flex items-center gap-2"
-                                            style={{ backgroundColor: label.color, color: "black" }}
+                                            className="gap-1 border-0 text-black/80"
+                                            style={{ backgroundColor: label.color }}
                                         >
                                             {label.name}
-                                            <div role="button" onClick={() => removeSelectedLabel(label.id)}>
-                                                <X className="size-3 cursor-pointer hover:bg-black/20 rounded"/>
-                                            </div>
+                                            <Button
+                                                type="button"
+                                                size="icon-xs"
+                                                variant="ghost"
+                                                aria-label={`Remove ${label.name}`}
+                                                className="-mr-1 size-4 text-black/60 hover:bg-black/15 hover:text-black"
+                                                onClick={() => removeSelectedLabel(label.id)}
+                                            >
+                                                <X/>
+                                            </Button>
                                         </Badge>
                                     )
                                 }

@@ -65,27 +65,29 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
     useOnClickOutside(formRef, handleClickOutside);
 
     return (
-        <form method="post" ref={formRef} onSubmit={onSubmitHandler} className="p-3">
-            <div className="flex flex-col gap-3">
+        <form method="post" ref={formRef} onSubmit={onSubmitHandler} className="border-t p-2">
+            <div className="flex flex-col gap-2">
                 <div>
                     <Textarea
                         name="title"
                         required={true}
                         autoFocus={true}
+                        maxLength={200}
                         ref={textAreaRef}
                         disabled={createCardMutation.isPending}
                         onChange={onChangeHandler}
                         onKeyDown={onKeyDownHandler}
-                        placeholder="Enter card content here..."
+                        placeholder="What needs to be done?"
+                        className="min-h-20 resize-none bg-background/65"
                     />
                 </div>
                 <div>
-                    <div className="flex justify-end items-center gap-2">
-                        <Button type="button" variant="outline" onClick={onComplete} disabled={createCardMutation.isPending}>
+                    <div className="flex items-center justify-end gap-2">
+                        <Button size="sm" type="button" variant="ghost" onClick={onComplete} disabled={createCardMutation.isPending}>
                             Cancel
                         </Button>
-                        <Button ref={buttonRef} variant="default" disabled={createCardMutation.isPending} type="submit">
-                            {createCardMutation.isPending && <Loader2 className="animate-spin"/>} Add
+                        <Button size="sm" ref={buttonRef} disabled={createCardMutation.isPending} type="submit">
+                            {createCardMutation.isPending && <Loader2 data-icon="inline-start" className="animate-spin"/>} Add card
                         </Button>
                     </div>
                 </div>

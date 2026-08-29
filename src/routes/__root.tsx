@@ -1,8 +1,8 @@
 /// <reference types="vite/client"/>
-import {Toaster} from "sonner";
 import React, {lazy} from "react";
 import appCss from "~/styles.css?url";
 import {QueryClient} from "@tanstack/react-query";
+import {Toaster} from "~/lib/client/components/ui/sonner";
 import {authOptions} from "~/lib/client/react-query/query-options";
 import {createRootRouteWithContext, HeadContent, Outlet, Scripts} from "@tanstack/react-router";
 
@@ -41,11 +41,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <head>
             <HeadContent/>
         </head>
-        <body>
-
-        <div className="h-screen flex flex-col min-h-0">
+        <body className="bg-background text-foreground">
+        <div className="flex h-screen min-h-0 flex-col">
             <div className="grow min-h-0 h-full flex flex-col">
-                <Toaster/>
+                <Toaster position="bottom-right"/>
                 {children}
             </div>
         </div>

@@ -1,4 +1,4 @@
-import {ArrowLeft, LogOut} from "lucide-react";
+import {ArrowLeft, GripVertical, LogOut} from "lucide-react";
 import authClient from "~/lib/utils/auth-client";
 import {ColumnWithCards} from "~/lib/types/types";
 import {Button} from "~/lib/client/components/ui/button";
@@ -78,35 +78,43 @@ function BoardPage() {
     }, [boardData.columns, cardsMapById]);
 
     return (
-        <div className="flex flex-col h-screen">
+        <main className="flex h-screen flex-col overflow-hidden">
             <title>{`${boardData.name} - Tresso`}</title>
 
-            <header className="flex items-center justify-between p-4 border-b  backdrop-blur-sm shrink-0">
-                <div className="flex items-center gap-4">
-                    <Button size="sm" variant="ghost" asChild={true}>
-                        <Link to="/boards">
-                            <ArrowLeft className="size-4 mr-1"/> All Boards
-                        </Link>
+            <header className="flex shrink-0 items-center justify-between border-b bg-background/75 px-4 py-3 backdrop-blur-xl sm:px-6">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                    <span className="hidden size-8 shrink-0 place-items-center rounded-lg bg-foreground text-background sm:grid">
+                        <GripVertical/>
+                    </span>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        render={<Link to="/boards"/>}
+                        nativeButton={false}
+                    >
+                        <ArrowLeft data-icon="inline-start"/> Boards
                     </Button>
-                    <h1 className="text-2xl font-bold">
+                    <div className="h-5 w-px bg-border"/>
+                    <span className="size-2.5 shrink-0 rounded-full ring-2 ring-foreground/10" style={{ backgroundColor: boardData.color }}/>
+                    <h1 className="min-w-0 font-heading text-lg font-medium tracking-tight sm:text-xl">
                         <EditableText
                             fieldName="name"
-                            buttonClass="text-2xl"
+                            buttonClass="h-8 max-w-[45vw] justify-start truncate px-1.5 text-lg font-medium sm:text-xl"
                             editState={boardNameEditState}
                             onChange={changeBoardNameHandler}
-                            inputClass="text-2xl font-medium rounded-md py-0.5 px-4 focus:outline-none focus:ring-2 focus:ring-gray-800"
+                            inputClass="h-8 max-w-[45vw] rounded-lg border border-input bg-input/30 px-2 text-lg font-medium outline-none focus:border-ring focus:ring-3 focus:ring-ring/50 sm:text-xl"
                             value={(updateBoardMutation.isPending && updateBoardMutation.variables.data.name) ?
                                 updateBoardMutation.variables.data.name : boardData.name}
                         />
                     </h1>
                 </div>
-                <Button size="sm" variant="ghost" onClick={handleLogout}>
-                    <LogOut className="size-4 mr-2"/> Logout
+                <Button size="sm" variant="ghost" onClick={handleLogout} className="shrink-0">
+                    <LogOut data-icon="inline-start"/> <span className="hidden sm:inline">Sign out</span>
                 </Button>
             </header>
 
-            <div ref={scrollContainerRef} className="grow min-h-0 flex flex-col overflow-x-auto">
-                <div {...dragScroll} className="flex grow min-h-0 h-full pl-2 pb-4 mt-4 w-fit">
+            <div ref={scrollContainerRef} className="flex min-h-0 grow flex-col overflow-x-auto">
+                <div {...dragScroll} className="flex h-full min-h-0 w-fit grow items-start gap-3 px-4 py-5 sm:px-6">
                     {columns.map((col, idx) =>
                         <Column
                             col={col}
@@ -123,13 +131,9 @@ function BoardPage() {
                         editInitially={columns.length === 0}
                         onNewColumnAdded={() => (newColumnAddedRef.current = true)}
                     />
-                    <div className="w-8 h-1"/>
+                    <div className="h-1 w-3 shrink-0"/>
                 </div>
             </div>
-
-            <div className="-z-1 absolute top-2/5 left-35 w-28 h-28 bg-blue-500/20 rounded-full blur-xl"></div>
-            <div className="-z-1 absolute top-40 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>
-            <div className="-z-1 absolute bottom-20 left-2/3 w-24 h-24 bg-pink-500/20 rounded-full blur-xl"></div>
-        </div>
+        </main>
     );
 }
