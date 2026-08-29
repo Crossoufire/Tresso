@@ -65,7 +65,7 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
     useOnClickOutside(formRef, handleClickOutside);
 
     return (
-        <form method="post" ref={formRef} onSubmit={onSubmitHandler} className="border-t p-2">
+        <form method="post" ref={formRef} onSubmit={onSubmitHandler} className="shrink-0 border-t p-2">
             <div className="flex flex-col gap-2">
                 <div>
                     <Textarea

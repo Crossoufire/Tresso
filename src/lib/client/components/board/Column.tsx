@@ -142,7 +142,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
             onDragOver={onDragOverHandler}
             onDragLeave={() => setAcceptColDrop("none")}
             className={cn(
-                "flex max-h-full min-h-0 shrink-0 flex-col border-x-2 border-transparent",
+                "flex min-h-0 shrink-0 flex-col border-x-2 border-transparent",
                 acceptColDrop === "left"
                     ? "border-l-foreground/55 border-r-transparent"
                     : acceptColDrop === "right"
@@ -155,11 +155,11 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !isColumnPending}
                 className={cn(
-                    "group relative flex max-h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/12 backdrop-blur-sm",
+                    "group relative flex max-h-[calc(100dvh-6.5rem)] min-h-0 w-80 shrink-0 flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/12 backdrop-blur-sm",
                     acceptCardDrop && "ring-2 ring-foreground/45",
                 )}
             >
-                <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5" {...(col.cards.length ? cardDndProps : {})}>
+                <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2.5 pb-1.5" {...(col.cards.length ? cardDndProps : {})}>
                     <EditableText
                         fieldName="name"
                         buttonClass="h-7 max-w-56 justify-start truncate px-1.5 font-medium"
@@ -225,7 +225,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                         onComplete={() => setNewCardEdit(false)}
                     />
                     :
-                    <div className="border-t p-2" {...(col.cards.length ? cardDndProps : {})}>
+                    <div className="shrink-0 border-t p-2" {...(col.cards.length ? cardDndProps : {})}>
                         <Button className="w-full justify-start text-muted-foreground" variant="ghost" onClick={onAddCardClickHandler} disabled={deleteColumnMutation.isPending}>
                             <Plus data-icon="inline-start"/> Add card
                         </Button>
