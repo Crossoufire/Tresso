@@ -142,7 +142,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
             onDragOver={onDragOverHandler}
             onDragLeave={() => setAcceptColDrop("none")}
             className={cn(
-                "flex max-h-full shrink-0 flex-col border-x-2 border-transparent",
+                "flex max-h-full min-h-0 shrink-0 flex-col border-x-2 border-transparent",
                 acceptColDrop === "left"
                     ? "border-l-foreground/55 border-r-transparent"
                     : acceptColDrop === "right"
@@ -155,7 +155,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                 {...(col.cards.length ? {} : cardDndProps)}
                 draggable={!colNameEditState[0] && !isColumnPending}
                 className={cn(
-                    "group relative flex max-h-full w-80 shrink-0 flex-col overflow-hidden rounded-xl bg-card/85 ring-1 ring-foreground/10 backdrop-blur-sm",
+                    "group relative flex max-h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/12 backdrop-blur-sm",
                     acceptCardDrop && "ring-2 ring-foreground/45",
                 )}
             >
@@ -205,7 +205,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                     </DropdownMenu>
                     </div>
                 </div>
-                <ul ref={listRef} className="grow overflow-y-auto px-1 py-1.5">
+                <ul ref={listRef} className="min-h-0 grow overflow-y-auto overscroll-contain px-1 py-1.5">
                     {sortedCards.map((card, idx, cards) =>
                         <Card
                             card={card}

@@ -44,7 +44,7 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
         <>
             {editing ?
                 <form onSubmit={onSubmitHandler}>
-                    <Card className="w-80 bg-card/85 backdrop-blur-sm" ref={cardRef}>
+                    <Card className="w-80 bg-card backdrop-blur-sm" ref={cardRef}>
                         <CardHeader>
                             <CardTitle>Add column</CardTitle>
                             <CardDescription>Create another stage for this workflow.</CardDescription>
@@ -74,7 +74,7 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
                     </Card>
                 </form>
                 :
-                <Button onClick={() => setEditing(true)} variant="outline" className="w-80 justify-start bg-card/55 text-muted-foreground backdrop-blur-sm">
+                <Button onClick={() => setEditing(true)} variant="outline" className="w-80 justify-start bg-card/70 text-muted-foreground backdrop-blur-sm">
                     <Plus data-icon="inline-start"/> Add column
                 </Button>
             }

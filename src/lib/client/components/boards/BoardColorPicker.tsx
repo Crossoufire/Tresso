@@ -3,7 +3,11 @@ import {Input} from "~/lib/client/components/ui/input";
 
 export const DEFAULT_BOARD_COLOR = "#4f46e5";
 
-const BOARD_COLORS = ["#4f46e5", "#2563eb", "#0891b2", "#059669", "#ca8a04", "#ea580c", "#dc2626", "#9333ea"];
+const BOARD_COLORS = [
+    "#4f46e5", "#2563eb", "#0284c7", "#0891b2", "#0f766e", "#059669",
+    "#16a34a", "#65a30d", "#ca8a04", "#d97706", "#ea580c", "#dc2626",
+    "#e11d48", "#db2777", "#c026d3", "#9333ea", "#7c3aed", "#475569",
+];
 
 
 interface BoardColorPickerProps {
@@ -25,7 +29,7 @@ export function BoardColorPicker({ id, value, disabled, onChange }: BoardColorPi
                 disabled={disabled}
                 onChange={(event) => onChange(event.target.value)}
             />
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
                 {BOARD_COLORS.map((boardColor) =>
                     <button
                         type="button"
