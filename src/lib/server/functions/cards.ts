@@ -3,21 +3,21 @@ import {db} from "~/lib/server/database/db";
 import {and, asc, eq, max} from "drizzle-orm";
 import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
-import {createServerFn} from "@tanstack/react-start";
+import {createServerFn, createServerOnlyFn} from "@tanstack/react-start";
 import {FormattedError} from "~/lib/utils/error-classes";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createCardSchema, deleteCardSchema, labelToCardSchema, moveCardSchema, updateCardContentSchema, updateCardTitleSchema} from "~/lib/types/schemas";
 
 
-const touchBoard = async (boardId: number) => {
+const touchBoard = createServerOnlyFn(async (boardId: number) => {
     await db
         .update(s.boards)
         .set({ updatedAt: new Date() })
         .where(eq(s.boards.id, boardId));
-};
+});
 
 
-export const moveCardForUser = (data: z.infer<typeof moveCardSchema>, userId: number) => {
+export const moveCardForUser = createServerOnlyFn((data: z.infer<typeof moveCardSchema>, userId: number) => {
     return db.transaction((tx) => {
         const sourceCard = tx
             .select({ id: s.cards.id, boardId: s.cards.boardId, columnId: s.cards.columnId })
@@ -118,7 +118,7 @@ export const moveCardForUser = (data: z.infer<typeof moveCardSchema>, userId: nu
 
         return positions;
     }, { behavior: "immediate" });
-};
+});
 
 
 export const createCard = createServerFn({ method: "POST" })

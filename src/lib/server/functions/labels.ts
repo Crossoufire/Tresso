@@ -2,17 +2,17 @@ import {and, eq} from "drizzle-orm";
 import {db} from "~/lib/server/database/db";
 import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
-import {createServerFn} from "@tanstack/react-start";
+import {createServerFn, createServerOnlyFn} from "@tanstack/react-start";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createLabelSchema, deleteLabelSchema, updateLabelSchema} from "~/lib/types/schemas";
 
 
-const touchBoard = async (boardId: number) => {
+const touchBoard = createServerOnlyFn(async (boardId: number) => {
     await db
         .update(s.boards)
         .set({ updatedAt: new Date() })
         .where(eq(s.boards.id, boardId));
-};
+});
 
 
 export const createLabel = createServerFn({ method: "POST" })
