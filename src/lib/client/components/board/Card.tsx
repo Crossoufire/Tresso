@@ -4,12 +4,13 @@ import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
 import {Button} from "~/lib/client/components/ui/button";
 import {EditCardDialog} from "~/lib/client/components/edit-card/EditCardDialog";
-import {ArrowDown, ArrowUp, MessageSquareMore, MoreVertical} from "lucide-react";
+import {ArrowDown, ArrowDownToLine, ArrowUp, ArrowUpToLine, MessageSquareMore, MoreVertical} from "lucide-react";
 import {CardTransferType, CardType, ColumnWithCards, CONTENT_TYPES} from "~/lib/types/types";
 import {useDeleteCardMutation, useUpdateCardOrderMutation} from "~/lib/client/react-query/mutations";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuSub,
@@ -22,6 +23,8 @@ import {
 interface CardProps {
     card: CardType,
     columnId: number;
+    firstCardOrder: number;
+    lastCardOrder: number;
     nextOrder: number;
     nextNextOrder: number;
     previousOrder: number;
@@ -34,7 +37,7 @@ interface CardProps {
 
 
 export const Card = (props: CardProps) => {
-    const { card, columns, columnId, nextOrder, nextCardOrder, nextNextOrder, previousOrder, previousCardOrder, previousPreviousOrder, ref } = props;
+    const { card, columns, columnId, firstCardOrder, lastCardOrder, nextOrder, nextCardOrder, nextNextOrder, previousOrder, previousCardOrder, previousPreviousOrder, ref } = props;
 
     const deleteCardMutation = useDeleteCardMutation(card.boardId);
     const updateCardOrderMutation = useUpdateCardOrderMutation(card.boardId);
@@ -172,39 +175,59 @@ export const Card = (props: CardProps) => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" onClick={stopCardClick} onPointerDown={stopCardClick}>
-                            <DropdownMenuItem disabled={isPending} onSelect={openEditDialog}>
-                                Edit Card
-                            </DropdownMenuItem>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem disabled={isPending} onSelect={openEditDialog}>
+                                    Edit Card
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
                             <DropdownMenuSeparator/>
-                            <DropdownMenuItem onSelect={onMoveUpHandler} disabled={isPending || previousCardOrder === undefined}>
-                                <ArrowUp className="size-4"/> Move Up
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={onMoveDownHandler} disabled={isPending || nextCardOrder === undefined}>
-                                <ArrowDown className="size-4"/> Move Down
-                            </DropdownMenuItem>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                    onSelect={() => moveCard(firstCardOrder - 1)}
+                                    disabled={isPending || previousCardOrder === undefined}
+                                >
+                                    <ArrowUpToLine/> Move to Top
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={onMoveUpHandler} disabled={isPending || previousCardOrder === undefined}>
+                                    <ArrowUp/> Move Up
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={onMoveDownHandler} disabled={isPending || nextCardOrder === undefined}>
+                                    <ArrowDown/> Move Down
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onSelect={() => moveCard(lastCardOrder + 1)}
+                                    disabled={isPending || nextCardOrder === undefined}
+                                >
+                                    <ArrowDownToLine/> Move to Bottom
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
                             <DropdownMenuSub>
                                 <DropdownMenuSubTrigger disabled={isPending || columns.length <= 1}>
                                     Move to column
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuSubContent className="max-w-64" onClick={stopCardClick} onPointerDown={stopCardClick}>
-                                    {columns
-                                        .filter((targetColumn) => targetColumn.id !== columnId)
-                                        .map((targetColumn) =>
-                                            <DropdownMenuItem key={targetColumn.id} onSelect={() => onMoveToColHandler(targetColumn)}>
-                                                <span className="truncate">{targetColumn.name}</span>
-                                            </DropdownMenuItem>
-                                        )
-                                    }
+                                    <DropdownMenuGroup>
+                                        {columns
+                                            .filter((targetColumn) => targetColumn.id !== columnId)
+                                            .map((targetColumn) =>
+                                                <DropdownMenuItem key={targetColumn.id} onSelect={() => onMoveToColHandler(targetColumn)}>
+                                                    <span className="truncate">{targetColumn.name}</span>
+                                                </DropdownMenuItem>
+                                            )
+                                        }
+                                    </DropdownMenuGroup>
                                 </DropdownMenuSubContent>
                             </DropdownMenuSub>
                             <DropdownMenuSeparator/>
-                            <DropdownMenuItem
-                                disabled={isPending}
-                                onSelect={onDeleteHandler}
-                                className="text-destructive focus:text-destructive cursor-pointer"
-                            >
-                                Delete Card
-                            </DropdownMenuItem>
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                    disabled={isPending}
+                                    onSelect={onDeleteHandler}
+                                    className="text-destructive focus:text-destructive cursor-pointer"
+                                >
+                                    Delete Card
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

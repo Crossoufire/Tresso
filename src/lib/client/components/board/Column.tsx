@@ -228,6 +228,8 @@ export const Column = (props: ColumnProps) => {
                             key={card.id}
                             columns={columns}
                             columnId={col.id}
+                            firstCardOrder={cards[0].order}
+                            lastCardOrder={cards[cards.length - 1].order}
                             nextCardOrder={cards[idx + 1]?.order}
                             previousCardOrder={cards[idx - 1]?.order}
                             previousOrder={cards[idx - 1] ? cards[idx - 1].order : 0}
