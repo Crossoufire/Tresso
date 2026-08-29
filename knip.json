@@ -11,14 +11,11 @@
     ],
     "entry": [
         "server.ts",
-        "src/client.tsx",
-        "src/router.tsx",
-        "src/start.ts",
         "src/styles.css",
         "src/routes/**/*.{ts,tsx}"
     ],
     "project": [
-        "src/**/*.{ts,tsx}"
+        "src/**/*.{css,ts,tsx}"
     ],
     "vite": {
         "config": [
@@ -27,5 +24,8 @@
         ]
     },
     "ignoreIssues": {
+        "src/lib/client/components/ui/**": [
+            "exports"
+        ]
     }
 }
