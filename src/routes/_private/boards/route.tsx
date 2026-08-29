@@ -8,10 +8,11 @@ import {getBoardGradient} from "~/lib/utils/gradients";
 import {Button} from "~/lib/client/components/ui/button";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
+import {CreateBoardDialog} from "~/lib/client/components/boards/CreateBoardDialog";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
-import {CalendarClock, Columns3, LogOut, MoreVertical, Plus, Tag, WalletCards} from "lucide-react";
-import {useCreateBoardMutation, useDeleteBoardMutation, useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
+import {CalendarClock, Columns3, LogOut, MoreVertical, Tag, WalletCards} from "lucide-react";
+import {useDeleteBoardMutation, useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "~/lib/client/components/ui/dialog";
 
@@ -29,7 +30,6 @@ function BoardsPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [newName, setNewName] = useState("");
-    const createBoardMutation = useCreateBoardMutation();
     const deleteBoardMutation = useDeleteBoardMutation();
     const updateBoardMutation = useUpdateBoardMutation();
     const boardsList = useSuspenseQuery(boardsListOptions).data;
@@ -47,10 +47,6 @@ function BoardsPage() {
         else {
             setIsEditModalOpen(false);
         }
-    }
-
-    const onNewBoardClick = (name: string, color: string) => {
-        createBoardMutation.mutate({ data: { name, color } });
     }
 
     const onDeleteBoard = (ev: React.MouseEvent, boardId: number) => {
@@ -98,6 +94,7 @@ function BoardsPage() {
                 {boardsList.map((board, idx) =>
                     <Link key={board.id} to="/board/$boardId" params={{ boardId: board.id }} className="group">
                         <Card
+                            style={{ borderTopColor: board.color }}
                             className={`h-40 transition-all duration-200 cursor-pointer border-2 
                             hover:border-primary/30 ${getBoardGradient(board.id, idx)} relative overflow-hidden`}
                         >
@@ -168,22 +165,7 @@ function BoardsPage() {
                     </Link>
                 )}
 
-                <Card
-                    onClick={() => onNewBoardClick("New Board", "#000000")}
-                    className="h-40 border-2 border-dashed border-muted-foreground/25 hover:border-primary/50
-                    transition-colors duration-200 cursor-pointer group"
-                >
-                    <CardHeader className="h-full flex items-center">
-                        <div className="text-center">
-                            <div className="size-12 rounded-full bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 duration-200">
-                                <Plus className="size-6 text-neutral-300 group-hover:text-primary duration-200"/>
-                            </div>
-                            <p className="text-md font-medium text-neutral-300 group-hover:text-primary duration-200">
-                                Create A New Board
-                            </p>
-                        </div>
-                    </CardHeader>
-                </Card>
+                <CreateBoardDialog/>
             </div>
             <div className="-z-1 absolute top-2/5 left-35 w-28 h-28 bg-blue-500/20 rounded-full blur-xl"></div>
             <div className="-z-1 absolute top-40 right-20 w-32 h-32 bg-purple-500/20 rounded-full blur-xl"></div>
