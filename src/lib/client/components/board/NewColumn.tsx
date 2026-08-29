@@ -27,14 +27,17 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
 
     const onSubmitHandler = (ev: React.SubmitEvent) => {
         ev.preventDefault();
-        if (!inputRef.current) return;
+        if (!inputRef.current || createColMutation.isPending) return;
 
         createColMutation.mutate({ data: { boardId, name: inputRef.current.value } }, {
-            onSuccess: () => toast.success("New Column Created!"),
+            onSuccess: () => {
+                if (inputRef.current) {
+                    inputRef.current.value = "";
+                }
+                onNewColumnAdded();
+                toast.success("New Column Created!");
+            },
         });
-
-        inputRef.current.value = "";
-        onNewColumnAdded();
     };
 
     return (

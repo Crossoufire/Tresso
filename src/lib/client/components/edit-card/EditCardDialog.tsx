@@ -28,6 +28,11 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
     const updateCardContentMutation = useUpdateCardContentMutation(card.boardId);
     const removeLabelFromCardMutation = useRemoveLabelFromCardMutation(card.boardId);
 
+    const cancelContentEdit = () => {
+        setNewContent(card.content || "");
+        setIsEditingContent(false);
+    };
+
     const updateCardTitleHandler = (newTitle: string) => {
         updateCardTitleMutation.mutate({ data: { id: card.id, title: newTitle } });
     }
@@ -46,10 +51,13 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
         removeLabelFromCardMutation.mutate({ data: { cardId: card.id, labelId } });
     };
 
-    useOnClickOutside(dialogRef, () => setIsEditingContent(false));
+    useOnClickOutside(dialogRef, cancelContentEdit);
 
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            if (!open) cancelContentEdit();
+            setDialogOpen(open);
+        }}>
             <DialogContent className="w-125 max-h-[80vh] overflow-y-auto overflow-x-hidden" ref={dialogRef}>
                 <DialogHeader>
                     <DialogTitle>Edit Card</DialogTitle>
@@ -87,7 +95,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                 <div className="flex gap-2 mt-2">
                                     <Button
                                         variant="outline"
-                                        onClick={() => setIsEditingContent(false)}
+                                        onClick={cancelContentEdit}
                                         disabled={updateCardContentMutation.isPending}
                                     >
                                         Cancel
@@ -107,8 +115,11 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                 style={{ resize: "none" }}
                                 defaultValue={card.content || ""}
                                 placeholder="Add a description to this card..."
-                                onClick={() => setIsEditingContent(!isEditingContent)}
                                 className="min-h-37.5 max-h-75 text-sm text-muted-foreground hover:bg-muted/50 cursor-pointer"
+                                onClick={() => {
+                                    setNewContent(card.content || "");
+                                    setIsEditingContent(true);
+                                }}
                             />
                         }
                     </div>

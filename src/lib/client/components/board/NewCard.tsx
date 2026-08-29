@@ -21,18 +21,16 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
 
     const onSubmitHandler = (ev: React.SubmitEvent<HTMLFormElement>) => {
         ev.preventDefault();
+        if (createCardMutation.isPending) return;
 
         const formData = new FormData(ev.currentTarget);
-        if (textAreaRef.current) {
-            textAreaRef.current.value = "";
-        }
 
-        createCardMutation.mutate({
-            data: {
-                boardId,
-                columnId,
-                title: formData.get("title") as string,
-            }
+        createCardMutation.mutate({ data: { boardId, columnId, title: formData.get("title") as string } }, {
+            onSuccess: () => {
+                if (textAreaRef.current) {
+                    textAreaRef.current.value = "";
+                }
+            },
         });
     };
 
@@ -50,19 +48,15 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
         ev.currentTarget.style.height = ev.currentTarget.scrollHeight + "px";
     };
 
-    const handleClickOutside = async () => {
+    const handleClickOutside = () => {
+        if (createCardMutation.isPending) return;
+
         const value = textAreaRef.current?.value?.trim();
         if (value) {
-            await createCardMutation.mutateAsync({
-                data: {
-                    boardId,
-                    columnId,
-                    title: value,
-                },
+            createCardMutation.mutate({ data: { boardId, columnId, title: value } }, {
+                onSuccess: onComplete,
             });
-            if (textAreaRef.current) {
-                textAreaRef.current.value = "";
-            }
+            return;
         }
 
         onComplete();
@@ -79,6 +73,7 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
                         required={true}
                         autoFocus={true}
                         ref={textAreaRef}
+                        disabled={createCardMutation.isPending}
                         onChange={onChangeHandler}
                         onKeyDown={onKeyDownHandler}
                         placeholder="Enter card content here..."
@@ -86,7 +81,7 @@ export function NewCard({ columnId, boardId, onComplete }: NewCardProps) {
                 </div>
                 <div>
                     <div className="flex justify-end items-center gap-2">
-                        <Button variant="outline" onClick={onComplete} disabled={createCardMutation.isPending}>
+                        <Button type="button" variant="outline" onClick={onComplete} disabled={createCardMutation.isPending}>
                             Cancel
                         </Button>
                         <Button ref={buttonRef} variant="default" disabled={createCardMutation.isPending} type="submit">
