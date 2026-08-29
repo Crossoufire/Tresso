@@ -1,4 +1,3 @@
-import {z} from "zod";
 import {db} from "~/lib/server/database/db";
 import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
@@ -6,7 +5,7 @@ import {and, asc, desc, eq, sql} from "drizzle-orm";
 import {createServerFn} from "@tanstack/react-start";
 import {tryNotFound} from "~/lib/utils/try-not-found";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
-import {createBoardSchema, deleteBoardSchema, updateBoardSchema} from "~/lib/types/schemas";
+import {createBoardSchema, deleteBoardSchema, getBoardSchema, updateBoardSchema} from "~/lib/types/schemas";
 
 
 export const getBoards = createServerFn({ method: "GET" })
@@ -32,7 +31,7 @@ export const getBoards = createServerFn({ method: "GET" })
 
 export const getBoard = createServerFn({ method: "GET" })
     .middleware([authMiddleware])
-    .validator((data) => tryNotFound(data, z.object({ boardId: z.number() })))
+    .validator((data) => tryNotFound(data, getBoardSchema))
     .handler(async ({ data: { boardId }, context: { currentUser } }) => {
         const boardData = await db.query.boards.findFirst({
             where: and(eq(s.boards.id, boardId), eq(s.boards.userId, currentUser.id)),
@@ -87,6 +86,8 @@ export const updateBoard = createServerFn({ method: "POST" })
             .update(s.boards)
             .set({ ...updates, updatedAt: new Date() })
             .where(and(eq(s.boards.id, id), eq(s.boards.userId, currentUser.id)));
+
+        return data;
     });
 
 

@@ -28,11 +28,11 @@ export const useUpdateBoardMutation = () => {
 
     return useMutation({
         mutationFn: updateBoard,
-        onSuccess: (_data, variables) => {
+        onSuccess: (data) => {
             void queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey });
-            queryClient.setQueryData(boardDetailsOptions(variables.data.id).queryKey, (oldData) => {
+            queryClient.setQueryData(boardDetailsOptions(data.id).queryKey, (oldData) => {
                 if (!oldData) return;
-                return { ...oldData, name: variables.data.name ?? "" };
+                return { ...oldData, ...data };
             });
         }
     })
@@ -84,6 +84,15 @@ export const useUpdateColumnMutation = (boardId: number) => {
                     ),
                 };
             })
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
+                if (!oldData) return;
+                return {
+                    ...oldData,
+                    columns: oldData.columns.map((column) => column.id === data.id ? { ...column, ...data } : column),
+                };
+            });
         },
         onSettled: () => {
             invalidateBoardsList(queryClient);
@@ -190,13 +199,13 @@ export const useUpdateCardTitleMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: updateCardTitle,
-        onSuccess: async (_data, variables) => {
+        onSuccess: async (data) => {
             invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.id ? { ...card, ...variables.data } : card),
+                    cards: oldData.cards.map((card) => card.id === data.id ? { ...card, ...data } : card),
                 }
             })
         },
@@ -209,14 +218,14 @@ export const useUpdateCardContentMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: updateCardContent,
-        onSuccess: async (_data, variables) => {
+        onSuccess: async (data) => {
             invalidateBoardsList(queryClient);
             queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
                 if (!oldData) return;
                 return {
                     ...oldData,
                     cards: oldData.cards.map((card) =>
-                        card.id === variables.data.id ? { ...card, ...variables.data } : card
+                        card.id === data.id ? { ...card, ...data } : card
                     ),
                 }
             })

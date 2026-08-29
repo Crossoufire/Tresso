@@ -136,6 +136,8 @@ export const updateColumn = createServerFn({ method: "POST" })
             .where(and(eq(s.columns.id, id), eq(s.columns.boardId, targetColumn.boardId)));
 
         await touchBoard(targetColumn.boardId);
+
+        return data;
     });
 
 

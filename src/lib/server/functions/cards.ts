@@ -225,6 +225,8 @@ export const updateCardTitle = createServerFn({ method: "POST" })
             .where(eq(s.cards.id, data.id));
 
         await touchBoard(cardData.boardId);
+
+        return data;
     });
 
 
@@ -251,6 +253,8 @@ export const updateCardContent = createServerFn({ method: "POST" })
             .where(eq(s.cards.id, data.id));
 
         await touchBoard(cardData.boardId);
+
+        return data;
     });
 
 
