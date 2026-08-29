@@ -2,7 +2,7 @@
 import React, {lazy} from "react";
 import appCss from "~/styles.css?url";
 import {QueryClient} from "@tanstack/react-query";
-import {Toaster} from "~/lib/client/components/ui/sonner";
+import {Toaster} from "~/lib/client/components/ui/toast";
 import {authOptions} from "~/lib/client/react-query/query-options";
 import {createRootRouteWithContext, HeadContent, Outlet, Scripts} from "@tanstack/react-router";
 
@@ -44,7 +44,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <body className="bg-background text-foreground">
         <div className="flex h-screen min-h-0 flex-col">
             <div className="grow min-h-0 h-full flex flex-col">
-                <Toaster position="bottom-right"/>
+                <Toaster/>
                 {children}
             </div>
         </div>

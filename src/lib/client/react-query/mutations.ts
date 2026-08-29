@@ -1,4 +1,5 @@
-import {useMutation, useQueryClient,} from "@tanstack/react-query";
+import {type QueryClient, useMutation, useQueryClient} from "@tanstack/react-query";
+import type {BoardType} from "~/lib/types/types";
 import {createBoard, deleteBoard, updateBoard} from "~/lib/server/functions/boards";
 import {createLabel, deleteLabel, updateLabel} from "~/lib/server/functions/labels";
 import {boardDetailsOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
@@ -6,8 +7,21 @@ import {createColumn, deleteColumn, moveColumn, updateColumn} from "~/lib/server
 import {addLabelToCard, createCard, deleteCard, moveCard, removeLabelFromCard, updateCardContent, updateCardTitle} from "~/lib/server/functions/cards";
 
 
-const invalidateBoardsList = (queryClient: ReturnType<typeof useQueryClient>) => {
+const invalidateBoardsList = (queryClient: QueryClient) => {
     void queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey });
+};
+
+const invalidateBoardDetails = (queryClient: QueryClient, boardId: number) => {
+    invalidateBoardsList(queryClient);
+    return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
+};
+
+const updateBoardCache = (
+    queryClient: QueryClient,
+    boardId: number,
+    update: (board: BoardType) => BoardType,
+) => {
+    queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (board) => board ? update(board) : board);
 };
 
 
@@ -30,10 +44,7 @@ export const useUpdateBoardMutation = () => {
         mutationFn: updateBoard,
         onSuccess: (data) => {
             void queryClient.invalidateQueries({ queryKey: boardsListOptions.queryKey });
-            queryClient.setQueryData(boardDetailsOptions(data.id).queryKey, (oldData) => {
-                if (!oldData) return;
-                return { ...oldData, ...data };
-            });
+            updateBoardCache(queryClient, data.id, (board) => ({ ...board, ...data }));
         }
     })
 };
@@ -58,10 +69,10 @@ export const useCreateColumnMutation = () => {
         mutationFn: createColumn,
         onSuccess: (data) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return { ...oldData, columns: [...oldData.columns, data] };
-            });
+            updateBoardCache(queryClient, data.boardId, (board) => ({
+                ...board,
+                columns: [...board.columns, data],
+            }));
         }
     })
 };
@@ -73,31 +84,22 @@ export const useUpdateColumnMutation = (boardId: number) => {
     return useMutation({
         mutationFn: updateColumn,
         onMutate: async (variables) => {
-            await queryClient.cancelQueries();
+            await queryClient.cancelQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
 
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    columns: oldData.columns.map(col =>
-                        col.id === variables.data.id ? { ...col, ...variables.data } : col
-                    ),
-                };
-            })
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                columns: board.columns.map(col =>
+                    col.id === variables.data.id ? { ...col, ...variables.data } : col
+                ),
+            }));
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    columns: oldData.columns.map((column) => column.id === data.id ? { ...column, ...data } : column),
-                };
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                columns: board.columns.map((column) => column.id === data.id ? { ...column, ...data } : column),
+            }));
         },
-        onSettled: () => {
-            invalidateBoardsList(queryClient);
-            return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
-        },
+        onSettled: () => invalidateBoardDetails(queryClient, boardId),
     })
 };
 
@@ -110,21 +112,15 @@ export const useMoveColumnMutation = (boardId: number) => {
         onSuccess: (positions) => {
             const positionsById = new Map(positions.map((position) => [position.id, position.order]));
 
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    columns: oldData.columns.map((column) => {
-                        const order = positionsById.get(column.id);
-                        return order === undefined ? column : { ...column, order };
-                    }),
-                };
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                columns: board.columns.map((column) => {
+                    const order = positionsById.get(column.id);
+                    return order === undefined ? column : { ...column, order };
+                }),
+            }));
         },
-        onSettled: () => {
-            invalidateBoardsList(queryClient);
-            return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
-        },
+        onSettled: () => invalidateBoardDetails(queryClient, boardId),
     });
 };
 
@@ -134,22 +130,19 @@ export const useDeleteColumnMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: deleteColumn,
-        onSuccess: async (_data, variables) => {
+        onSuccess: (_data, variables) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.filter((card) => card.columnId !== variables.data.id),
-                    columns: oldData.columns.filter((column) => column.id !== variables.data.id),
-                }
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.filter((card) => card.columnId !== variables.data.id),
+                columns: board.columns.filter((column) => column.id !== variables.data.id),
+            }));
         },
     })
 };
 
 
-// --- COLUMNS ----------------------------------------------------
+// --- CARDS ------------------------------------------------------
 
 export const useCreateCardMutation = (boardId: number) => {
     const queryClient = useQueryClient();
@@ -158,10 +151,10 @@ export const useCreateCardMutation = (boardId: number) => {
         mutationFn: createCard,
         onSuccess: (data) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return { ...oldData, cards: [...oldData.cards, data] }
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: [...board.cards, data],
+            }));
         }
     })
 };
@@ -175,21 +168,15 @@ export const useMoveCardMutation = (boardId: number) => {
         onSuccess: (positions) => {
             const positionsById = new Map(positions.map((position) => [position.id, position]));
 
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.map((card) => {
-                        const position = positionsById.get(card.id);
-                        return position ? { ...card, ...position } : card;
-                    }),
-                }
-            })
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.map((card) => {
+                    const position = positionsById.get(card.id);
+                    return position ? { ...card, ...position } : card;
+                }),
+            }));
         },
-        onSettled: () => {
-            invalidateBoardsList(queryClient);
-            return queryClient.invalidateQueries({ queryKey: boardDetailsOptions(boardId).queryKey });
-        },
+        onSettled: () => invalidateBoardDetails(queryClient, boardId),
     })
 };
 
@@ -199,15 +186,12 @@ export const useUpdateCardTitleMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: updateCardTitle,
-        onSuccess: async (data) => {
+        onSuccess: (data) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.map((card) => card.id === data.id ? { ...card, ...data } : card),
-                }
-            })
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.map((card) => card.id === data.id ? { ...card, ...data } : card),
+            }));
         },
     })
 };
@@ -218,17 +202,14 @@ export const useUpdateCardContentMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: updateCardContent,
-        onSuccess: async (data) => {
+        onSuccess: (data) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.map((card) =>
-                        card.id === data.id ? { ...card, ...data } : card
-                    ),
-                }
-            })
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.map((card) =>
+                    card.id === data.id ? { ...card, ...data } : card
+                ),
+            }));
         },
     })
 };
@@ -239,15 +220,12 @@ export const useDeleteCardMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: deleteCard,
-        onSuccess: async (_data, variables) => {
+        onSuccess: (_data, variables) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.filter((card) => card.id !== variables.data.id),
-                }
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.filter((card) => card.id !== variables.data.id),
+            }));
         },
     })
 };
@@ -258,15 +236,14 @@ export const useAddLabelToCardMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: addLabelToCard,
-        onSuccess: async (data, variables) => {
+        onSuccess: (data, variables) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.cardId ? { ...card, labels: [...card.labels, data] } : card),
-                }
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.map((card) => card.id === variables.data.cardId
+                    ? { ...card, labels: [...card.labels, data] }
+                    : card),
+            }));
         },
     })
 };
@@ -277,17 +254,14 @@ export const useRemoveLabelFromCardMutation = (boardId: number) => {
 
     return useMutation({
         mutationFn: removeLabelFromCard,
-        onSuccess: async (_data, variables) => {
+        onSuccess: (_data, variables) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    cards: oldData.cards.map((card) => card.id === variables.data.cardId ?
-                        { ...card, labels: card.labels.filter((l) => l.id !== variables.data.labelId) } : card
-                    ),
-                }
-            });
+            updateBoardCache(queryClient, boardId, (board) => ({
+                ...board,
+                cards: board.cards.map((card) => card.id === variables.data.cardId ?
+                    { ...card, labels: card.labels.filter((l) => l.id !== variables.data.labelId) } : card
+                ),
+            }));
         },
     })
 };
@@ -300,15 +274,12 @@ export const useCreateLabelMutation = () => {
 
     return useMutation({
         mutationFn: createLabel,
-        onSuccess: async (data) => {
+        onSuccess: (data) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    labels: [...oldData.labels, data],
-                };
-            });
+            updateBoardCache(queryClient, data.boardId, (board) => ({
+                ...board,
+                labels: [...board.labels, data],
+            }));
         },
     });
 };
@@ -319,19 +290,16 @@ export const useUpdateLabelMutation = () => {
 
     return useMutation({
         mutationFn: updateLabel,
-        onSuccess: async (data) => {
+        onSuccess: (data) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(data.boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    labels: oldData.labels.map((label) => label.id === data.id ? data : label),
-                    cards: oldData.cards.map((card) => ({
-                        ...card,
-                        labels: card.labels.map((label) => label.id === data.id ? data : label),
-                    })),
-                };
-            });
+            updateBoardCache(queryClient, data.boardId, (board) => ({
+                ...board,
+                labels: board.labels.map((label) => label.id === data.id ? data : label),
+                cards: board.cards.map((card) => ({
+                    ...card,
+                    labels: card.labels.map((label) => label.id === data.id ? data : label),
+                })),
+            }));
         },
     })
 };
@@ -342,18 +310,16 @@ export const useDeleteLabelMutation = () => {
 
     return useMutation({
         mutationFn: deleteLabel,
-        onSuccess: async (_data, variables) => {
+        onSuccess: (_data, variables) => {
             invalidateBoardsList(queryClient);
-            queryClient.setQueryData(boardDetailsOptions(variables.data.boardId).queryKey, (oldData) => {
-                if (!oldData) return;
-                return {
-                    ...oldData,
-                    labels: oldData.labels.filter((label) => label.id !== variables.data.id),
-                    cards: oldData.cards.map((card) => {
-                        return { ...card, labels: card.labels.filter((label) => label.id !== variables.data.id) }
-                    }),
-                }
-            });
+            updateBoardCache(queryClient, variables.data.boardId, (board) => ({
+                ...board,
+                labels: board.labels.filter((label) => label.id !== variables.data.id),
+                cards: board.cards.map((card) => ({
+                    ...card,
+                    labels: card.labels.filter((label) => label.id !== variables.data.id),
+                })),
+            }));
         },
     });
 };

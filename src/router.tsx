@@ -1,4 +1,4 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import {routeTree} from "~/routeTree.gen";
 import {createRouter} from "@tanstack/react-router";
 import {NotFound} from "~/lib/client/components/NotFound";
@@ -11,7 +11,7 @@ export function getRouter() {
     const queryClient: QueryClient = new QueryClient({
         mutationCache: new MutationCache({
             onError: (error) => {
-                toast.error(error.message);
+                toast.add({title: error.message, type: "error", priority: "high"});
             },
         }),
         defaultOptions: {

@@ -1,13 +1,13 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import {Loader2, Plus} from "lucide-react";
-import React, {useRef, useState} from "react";
+import React, {useCallback, useRef, useState} from "react";
 import {Input} from "~/lib/client/components/ui/input";
 import {Button} from "~/lib/client/components/ui/button";
 import {useCreateColumnMutation} from "~/lib/client/react-query/mutations";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 
 
-interface NewColumProps {
+interface NewColumnProps {
     boardId: number;
     onExpand: () => void;
     editInitially: boolean;
@@ -15,15 +15,15 @@ interface NewColumProps {
 }
 
 
-export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }: NewColumProps) {
+export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }: NewColumnProps) {
     const createColMutation = useCreateColumnMutation();
     const [editing, setEditing] = useState(editInitially);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const cardRef = (ev: HTMLDivElement | null) => {
-        if (!ev) return;
+    const cardRef = useCallback((node: HTMLDivElement | null) => {
+        if (!node) return;
         onExpand();
-    }
+    }, [onExpand]);
 
     const onSubmitHandler = (ev: React.SubmitEvent) => {
         ev.preventDefault();
@@ -35,7 +35,7 @@ export function NewColumn({ boardId, editInitially, onNewColumnAdded, onExpand }
                     inputRef.current.value = "";
                 }
                 onNewColumnAdded();
-                toast.success("New Column Created!");
+                toast.add({title: "Column created successfully", type: "success"});
             },
         });
     };

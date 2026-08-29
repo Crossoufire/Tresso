@@ -58,24 +58,20 @@ function BoardPage() {
         newColumnAddedRef.current = false;
     }, [scrollToEnd]);
 
-    const cardsMapById = useMemo(() => {
-        return new Map(boardData.cards.map((card) => [card.id, card]));
-    }, [boardData.cards]);
-
     const columns = useMemo(() => {
         const columnsMap = new Map<number, ColumnWithCards>();
 
-        for (const column of [...boardData.columns]) {
+        for (const column of boardData.columns) {
             columnsMap.set(column.id, { ...column, cards: [] });
         }
 
-        for (const card of cardsMapById.values()) {
+        for (const card of boardData.cards) {
             const column = columnsMap.get(card.columnId);
             column?.cards.push(card);
         }
 
         return [...columnsMap.values()].sort((a, b) => a.order - b.order);
-    }, [boardData.columns, cardsMapById]);
+    }, [boardData.cards, boardData.columns]);
 
     return (
         <main className="flex h-screen flex-col overflow-hidden">

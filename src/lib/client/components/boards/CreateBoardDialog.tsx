@@ -1,4 +1,4 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import React, {useState} from "react";
 import {Loader2, Plus} from "lucide-react";
 import {Input} from "~/lib/client/components/ui/input";
@@ -35,7 +35,7 @@ export function CreateBoardDialog() {
             onSuccess: () => {
                 setIsOpen(false);
                 resetForm();
-                toast.success("Board created successfully");
+                toast.add({title: "Board created successfully", type: "success"});
             },
         });
     };

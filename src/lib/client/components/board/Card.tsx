@@ -1,4 +1,4 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import {cn} from "~/lib/utils/utils";
 import React, {Ref, useState} from "react";
 import {Badge} from "~/lib/client/components/ui/badge";
@@ -129,7 +129,7 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
         deleteCardMutation.mutate({ data: { id: card.id } }, {
             onSuccess: () => {
                 setIsDeleteDialogOpen(false);
-                toast.success("Card successfully deleted");
+                toast.add({title: "Card deleted successfully", type: "success"});
             },
         });
     };

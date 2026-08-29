@@ -1,4 +1,4 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import authClient from "~/lib/utils/auth-client";
 import {Button} from "~/lib/client/components/ui/button";
 import {createFileRoute, redirect} from "@tanstack/react-router";
@@ -29,7 +29,7 @@ function LoginPage() {
     const handleGoogleSignIn = async () => {
         await authClient.signIn.social({ provider: "google" }, {
             onError: (ctx) => {
-                toast.error(ctx.error.message);
+                toast.add({title: ctx.error.message, type: "error", priority: "high"});
             },
         })
     };

@@ -1,4 +1,4 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import {useState} from "react";
 import authClient from "~/lib/utils/auth-client";
 import {formatUpdatedAt} from "~/lib/utils/utils";
@@ -44,7 +44,6 @@ function BoardsPage() {
         const trimmedName = newName.trim();
         if (editingBoard && trimmedName && (trimmedName !== editingBoard.name || newColor !== editingBoard.color)) {
             updateBoardMutation.mutate({ data: { id: editingBoard.id, name: trimmedName, color: newColor } }, {
-                onError: () => toast.error("Failed to update board"),
                 onSuccess: () => setIsEditModalOpen(false),
             });
             return;
@@ -57,7 +56,7 @@ function BoardsPage() {
         deleteBoardMutation.mutate({ data: { id: boardId } }, {
             onSuccess: () => {
                 setDeletingBoard(null);
-                toast.success("Board deleted successfully");
+                toast.add({title: "Board deleted successfully", type: "success"});
             },
         });
     }

@@ -1,4 +1,5 @@
 import {Loader2} from "lucide-react";
+import {cn} from "~/lib/utils/utils";
 import {CardLabel} from "~/lib/types/types";
 import React, {useEffect, useState} from "react";
 import {Label} from "~/lib/client/components/ui/label";
@@ -68,9 +69,10 @@ export function LabelFormView({ mode, initialLabel, onSubmit, onBack, isPending 
                                     aria-pressed={color === c}
                                     onClick={() => setColor(c)}
                                     style={{ backgroundColor: c }}
-                                    className={`size-4 rounded-sm ring-1 ring-black/20 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                        color === c ? "scale-110" : "hover:scale-105"
-                                    }`}
+                                    className={cn(
+                                        "size-4 rounded-sm ring-1 ring-black/20 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                        color === c ? "scale-110" : "hover:scale-105",
+                                    )}
                                 />
                             )}
                         </div>

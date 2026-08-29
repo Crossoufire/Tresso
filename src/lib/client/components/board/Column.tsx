@@ -1,4 +1,4 @@
-import {toast} from "sonner";
+import {toast} from "~/lib/client/components/ui/toast";
 import {flushSync} from "react-dom";
 import {cn} from "~/lib/utils/utils";
 import {Card} from "~/lib/client/components/board/Card";
@@ -110,7 +110,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
         deleteColumnMutation.mutate({ data: { id: col.id } }, {
             onSuccess: () => {
                 setIsDeleteDialogOpen(false);
-                toast.success("Column successfully deleted");
+                toast.add({title: "Column deleted successfully", type: "success"});
             },
         })
     }

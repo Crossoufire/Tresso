@@ -5,16 +5,9 @@ import {notFound} from "@tanstack/react-router";
 import * as s from "~/lib/server/database/schemas";
 import {createServerFn, createServerOnlyFn} from "@tanstack/react-start";
 import {FormattedError} from "~/lib/utils/error-classes";
+import {touchBoard} from "~/lib/utils/touch-board";
 import {authMiddleware} from "~/lib/server/middlewares/authentication";
 import {createCardSchema, deleteCardSchema, labelToCardSchema, moveCardSchema, updateCardContentSchema, updateCardTitleSchema} from "~/lib/types/schemas";
-
-
-const touchBoard = createServerOnlyFn(async (boardId: number) => {
-    await db
-        .update(s.boards)
-        .set({ updatedAt: new Date() })
-        .where(eq(s.boards.id, boardId));
-});
 
 
 export const moveCardForUser = createServerOnlyFn((data: z.infer<typeof moveCardSchema>, userId: number) => {
