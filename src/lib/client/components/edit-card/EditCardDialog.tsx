@@ -90,7 +90,7 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                                     value={newContent}
                                     maxLength={10000}
                                     className="min-h-44 resize-y bg-input/30"
-                                    placeholder="Enter card description..."
+                                    placeholder="e.g. Add a short brief, acceptance criteria, useful links, or next steps…"
                                     onChange={(ev) => setNewContent(ev.target.value)}
                                 />
                                 <div className="flex justify-end gap-2">
@@ -117,13 +117,13 @@ export function EditCardDialog({ card, isDialogOpen, setDialogOpen }: EditCardDi
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="h-auto min-h-28 w-full justify-start bg-input/20 px-3 py-2 text-left leading-6 whitespace-pre-wrap text-muted-foreground ring-1 ring-foreground/8 hover:bg-input/35 hover:text-foreground"
+                                className="h-auto min-h-28 w-full items-start justify-start bg-input/20 px-3 py-2 text-left leading-6 whitespace-pre-wrap text-muted-foreground ring-1 ring-foreground/8 hover:bg-input/35 hover:text-foreground"
                                 onClick={() => {
                                     setNewContent(card.content || "");
                                     setIsEditingContent(true);
                                 }}
                             >
-                                {card.content || "Add a description to this card…"}
+                                {card.content || "Add a description… Try a short brief, acceptance criteria, links, or next steps."}
                             </Button>
                         }
                     </div>

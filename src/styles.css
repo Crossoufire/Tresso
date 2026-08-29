@@ -26,6 +26,12 @@
     transition-property: transform, -webkit-transform !important;
 }
 
+.board-surface {
+    background-image:
+        radial-gradient(circle at 88% -16%, rgb(255 255 255 / 24%), transparent 48%),
+        linear-gradient(155deg, rgb(255 255 255 / 4%), rgb(0 0 0 / 18%) 48%, rgb(0 0 0 / 58%));
+}
+
 /* --- SCROLLBAR -------------------------------------------------------------------------- */
 
 ::-webkit-scrollbar {

@@ -193,7 +193,7 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
                         >
                             <Ellipsis/>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" onClick={stopCardClick} onPointerDown={stopCardClick}>
+                        <DropdownMenuContent align="end" className="w-52" onClick={stopCardClick} onPointerDown={stopCardClick}>
                             <DropdownMenuGroup>
                                 <DropdownMenuItem disabled={isPending} onClick={openEditDialog}>
                                     <Pencil/> Edit card
@@ -220,23 +220,25 @@ export const Card = ({ card, columns, columnId, nextCardId, previousCardId, ref 
                                     <ArrowDownToLine/> Move to bottom
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
-                            <DropdownMenuSub>
-                                <DropdownMenuSubTrigger disabled={isPending || columns.length <= 1}>
-                                    Move to column
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent className="max-w-64" onClick={stopCardClick} onPointerDown={stopCardClick}>
-                                    <DropdownMenuGroup>
-                                        {columns
-                                            .filter((targetColumn) => targetColumn.id !== columnId)
-                                            .map((targetColumn) =>
-                                                <DropdownMenuItem key={targetColumn.id} onClick={() => onMoveToColHandler(targetColumn)}>
-                                                    <span className="truncate">{targetColumn.name}</span>
-                                                </DropdownMenuItem>
-                                            )
-                                        }
-                                    </DropdownMenuGroup>
-                                </DropdownMenuSubContent>
-                            </DropdownMenuSub>
+                            <DropdownMenuGroup>
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger disabled={isPending || columns.length <= 1}>
+                                        Move to column
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent className="w-52 max-w-64" onClick={stopCardClick} onPointerDown={stopCardClick}>
+                                        <DropdownMenuGroup>
+                                            {columns
+                                                .filter((targetColumn) => targetColumn.id !== columnId)
+                                                .map((targetColumn) =>
+                                                    <DropdownMenuItem key={targetColumn.id} onClick={() => onMoveToColHandler(targetColumn)}>
+                                                        <span className="truncate">{targetColumn.name}</span>
+                                                    </DropdownMenuItem>
+                                                )
+                                            }
+                                        </DropdownMenuGroup>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                            </DropdownMenuGroup>
                             <DropdownMenuSeparator/>
                             <DropdownMenuGroup>
                                 <DropdownMenuItem

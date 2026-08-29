@@ -159,7 +159,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                     acceptCardDrop && "ring-2 ring-foreground/45",
                 )}
             >
-                <div className="flex items-center justify-between gap-2 border-b px-3 py-2.5" {...(col.cards.length ? cardDndProps : {})}>
+                <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-1.5" {...(col.cards.length ? cardDndProps : {})}>
                     <EditableText
                         fieldName="name"
                         buttonClass="h-7 max-w-56 justify-start truncate px-1.5 font-medium"
@@ -186,7 +186,7 @@ export const Column = ({ ref, col, columns, previousColumnId, nextColumnId }: Co
                         >
                             <Ellipsis/>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuGroup>
                                 <DropdownMenuItem onClick={onMoveLeftHandler} disabled={isColumnPending || previousColumnId === undefined}>
                                     <ChevronLeft/> Move left

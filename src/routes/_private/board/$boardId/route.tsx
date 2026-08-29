@@ -95,7 +95,6 @@ function BoardPage() {
                         <ArrowLeft data-icon="inline-start"/> Boards
                     </Button>
                     <div className="h-5 w-px bg-border"/>
-                    <span className="size-2.5 shrink-0 rounded-full ring-2 ring-foreground/10" style={{ backgroundColor: boardData.color }}/>
                     <h1 className="min-w-0 font-heading text-lg font-medium tracking-tight sm:text-xl">
                         <EditableText
                             fieldName="name"

@@ -3,13 +3,10 @@ import React, {useState} from "react";
 import {Loader2, Plus} from "lucide-react";
 import {Input} from "~/lib/client/components/ui/input";
 import {Button} from "~/lib/client/components/ui/button";
+import {BoardColorPicker, DEFAULT_BOARD_COLOR} from "~/lib/client/components/boards/BoardColorPicker";
 import {useCreateBoardMutation} from "~/lib/client/react-query/mutations";
 import {Field, FieldDescription, FieldGroup, FieldLabel} from "~/lib/client/components/ui/field";
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "~/lib/client/components/ui/dialog";
-
-
-const DEFAULT_BOARD_COLOR = "#4f46e5";
-const BOARD_COLORS = ["#4f46e5", "#2563eb", "#0891b2", "#059669", "#ca8a04", "#ea580c", "#dc2626", "#9333ea"];
 
 
 export function CreateBoardDialog() {
@@ -50,7 +47,7 @@ export function CreateBoardDialog() {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="h-48 w-full flex-col gap-3 bg-card/55 text-muted-foreground ring-1 ring-foreground/8 hover:bg-card hover:text-foreground"
+                        className="h-52 w-full flex-col gap-3 rounded-2xl bg-card/55 text-muted-foreground ring-1 ring-foreground/8 hover:bg-card hover:text-foreground"
                     />
                 }
             >
@@ -69,11 +66,8 @@ export function CreateBoardDialog() {
                     </DialogHeader>
 
                     <div
-                        className="flex h-24 items-end rounded-xl p-4 text-white shadow-sm"
-                        style={{
-                            backgroundColor: color,
-                            backgroundImage: "linear-gradient(145deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.58))",
-                        }}
+                        className="board-surface flex h-24 items-end rounded-xl p-4 text-white shadow-sm"
+                        style={{ backgroundColor: color }}
                     >
                         <span className="truncate font-heading text-lg font-medium">
                             {name.trim() || "Untitled board"}
@@ -101,30 +95,12 @@ export function CreateBoardDialog() {
 
                         <Field data-disabled={createBoardMutation.isPending || undefined}>
                             <FieldLabel htmlFor="board-color">Board color</FieldLabel>
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    type="color"
-                                    value={color}
-                                    id="board-color"
-                                    className="h-8 w-12 shrink-0 cursor-pointer p-1"
-                                    disabled={createBoardMutation.isPending}
-                                    onChange={(event) => setColor(event.target.value)}
-                                />
-                                <div className="flex flex-wrap gap-1.5">
-                                    {BOARD_COLORS.map((boardColor) =>
-                                        <button
-                                            type="button"
-                                            key={boardColor}
-                                            aria-label={`Use ${boardColor}`}
-                                            aria-pressed={color === boardColor}
-                                            disabled={createBoardMutation.isPending}
-                                            onClick={() => setColor(boardColor)}
-                                            style={{ backgroundColor: boardColor }}
-                                            className="size-6 rounded-md ring-1 ring-black/20 transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                                        />
-                                    )}
-                                </div>
-                            </div>
+                            <BoardColorPicker
+                                value={color}
+                                id="board-color"
+                                onChange={setColor}
+                                disabled={createBoardMutation.isPending}
+                            />
                             <FieldDescription>{color.toUpperCase()} fills the board tile.</FieldDescription>
                         </Field>
                     </FieldGroup>

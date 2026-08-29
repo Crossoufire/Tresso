@@ -3,16 +3,17 @@ import {useState} from "react";
 import authClient from "~/lib/utils/auth-client";
 import {formatUpdatedAt} from "~/lib/utils/utils";
 import {Input} from "~/lib/client/components/ui/input";
-import {Label} from "~/lib/client/components/ui/label";
 import {Button} from "~/lib/client/components/ui/button";
 import {useQueryClient, useSuspenseQuery} from "@tanstack/react-query";
 import {Card, CardHeader, CardTitle} from "~/lib/client/components/ui/card";
 import {CreateBoardDialog} from "~/lib/client/components/boards/CreateBoardDialog";
+import {BoardColorPicker, DEFAULT_BOARD_COLOR} from "~/lib/client/components/boards/BoardColorPicker";
 import {createFileRoute, Link, useNavigate, useRouter} from "@tanstack/react-router";
 import {authOptions, boardsListOptions} from "~/lib/client/react-query/query-options";
-import {CalendarClock, Columns3, Ellipsis, GripVertical, LogOut, Pencil, Tag, Trash2, WalletCards} from "lucide-react";
+import {CalendarClock, Columns3, Ellipsis, GripVertical, Loader2, LogOut, Pencil, Tag, Trash2, WalletCards} from "lucide-react";
 import {useDeleteBoardMutation, useUpdateBoardMutation} from "~/lib/client/react-query/mutations";
 import {DeleteConfirmationDialog} from "~/lib/client/components/DeleteConfirmationDialog";
+import {Field, FieldDescription, FieldGroup, FieldLabel} from "~/lib/client/components/ui/field";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger} from "~/lib/client/components/ui/dropdown-menu";
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "~/lib/client/components/ui/dialog";
 
@@ -30,19 +31,20 @@ function BoardsPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [newName, setNewName] = useState("");
+    const [newColor, setNewColor] = useState(DEFAULT_BOARD_COLOR);
     const deleteBoardMutation = useDeleteBoardMutation();
     const updateBoardMutation = useUpdateBoardMutation();
     const boardsList = useSuspenseQuery(boardsListOptions).data;
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [deletingBoard, setDeletingBoard] = useState<{ id: number, name: string } | null>(null);
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-    const [editingBoard, setEditingBoard] = useState<{ id: number, name: string } | null>(null);
+    const [editingBoard, setEditingBoard] = useState<{ id: number, name: string, color: string } | null>(null);
 
-    const handleUpdateBoardName = () => {
+    const handleUpdateBoard = () => {
         const trimmedName = newName.trim();
-        if (editingBoard && trimmedName && trimmedName !== editingBoard.name) {
-            updateBoardMutation.mutate({ data: { id: editingBoard.id, name: trimmedName } }, {
-                onError: () => toast.error("Failed to update board name"),
+        if (editingBoard && trimmedName && (trimmedName !== editingBoard.name || newColor !== editingBoard.color)) {
+            updateBoardMutation.mutate({ data: { id: editingBoard.id, name: trimmedName, color: newColor } }, {
+                onError: () => toast.error("Failed to update board"),
                 onSuccess: () => setIsEditModalOpen(false),
             });
             return;
@@ -60,9 +62,10 @@ function BoardsPage() {
         });
     }
 
-    const handleOpenEditModal = (board: { id: number; name: string }) => {
+    const handleOpenEditModal = (board: { id: number; name: string; color: string }) => {
         setEditingBoard(board);
         setNewName(board.name);
+        setNewColor(board.color);
         setIsEditModalOpen(true);
     }
 
@@ -105,40 +108,36 @@ function BoardsPage() {
 
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {boardsList.map((board) =>
-                        <article key={board.id} className="group relative">
+                        <article key={board.id} className="relative">
                             <Link
                                 to="/board/$boardId"
                                 params={{ boardId: board.id }}
-                                className="block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                                className="block rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                             >
                                 <Card
-                                    style={{
-                                        backgroundColor: board.color,
-                                        backgroundImage: "linear-gradient(145deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.58))",
-                                    }}
-                                    className="h-48 bg-transparent py-0 text-white shadow-sm ring-0 transition-transform duration-200 group-hover:-translate-y-0.5"
+                                    style={{ backgroundColor: board.color }}
+                                    className="board-surface h-52 rounded-2xl bg-transparent py-0 text-white shadow-[0_20px_55px_-36px_rgb(0_0_0/0.95)] ring-0 transition-[filter,box-shadow] duration-200 hover:brightness-[1.04] hover:shadow-[0_24px_65px_-36px_rgb(0_0_0/1)]"
                                 >
-                                    <CardHeader className="flex h-full grid-cols-1 flex-col justify-between gap-6 p-5 pr-14">
-                                        <CardTitle className="line-clamp-2 text-xl leading-snug font-medium tracking-tight text-white">
+                                    <CardHeader className="grid h-full grid-cols-1 grid-rows-[auto_1fr_auto] gap-0 p-0">
+                                        <div className="flex items-center gap-1.5 px-5 pt-5 pr-14 text-xs text-white/65" title="Last updated">
+                                            <CalendarClock className="size-3.5"/>
+                                            <span className="truncate">Updated {formatUpdatedAt(board.updatedAt)}</span>
+                                        </div>
+
+                                        <CardTitle className="line-clamp-3 self-center px-5 py-4 text-2xl leading-tight font-medium tracking-[-0.025em] text-white">
                                             {board.name}
                                         </CardTitle>
 
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex items-center gap-2 text-xs text-white/85">
-                                                <span className="inline-flex items-center gap-1.5 rounded-md bg-black/20 px-2 py-1 backdrop-blur-sm" title="Columns">
-                                                    <Columns3 className="size-3.5"/> {board.columnsCount}
-                                                </span>
-                                                <span className="inline-flex items-center gap-1.5 rounded-md bg-black/20 px-2 py-1 backdrop-blur-sm" title="Cards">
-                                                    <WalletCards className="size-3.5"/> {board.cardsCount}
-                                                </span>
-                                                <span className="inline-flex items-center gap-1.5 rounded-md bg-black/20 px-2 py-1 backdrop-blur-sm" title="Labels">
-                                                    <Tag className="size-3.5"/> {board.labelsCount}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5 text-xs text-white/70" title="Last updated">
-                                                <CalendarClock className="size-3.5"/>
-                                                <span className="truncate">Updated {formatUpdatedAt(board.updatedAt)}</span>
-                                            </div>
+                                        <div className="flex items-center gap-5 bg-black/15 px-5 py-3.5 text-xs text-white/80 backdrop-blur-sm">
+                                            <span className="inline-flex items-center gap-1.5" title="Columns">
+                                                <Columns3 className="size-3.5"/> {board.columnsCount}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1.5" title="Cards">
+                                                <WalletCards className="size-3.5"/> {board.cardsCount}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1.5" title="Labels">
+                                                <Tag className="size-3.5"/> {board.labelsCount}
+                                            </span>
                                         </div>
                                     </CardHeader>
                                 </Card>
@@ -167,7 +166,7 @@ function BoardsPage() {
                                             handleOpenEditModal(board);
                                             setOpenDropdownId(null);
                                         }}>
-                                            <Pencil/> Rename
+                                            <Pencil/> Edit board
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             variant="destructive"
@@ -186,31 +185,60 @@ function BoardsPage() {
                 </section>
             </div>
 
-            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-sm">
-                    <DialogHeader>
-                        <DialogTitle>Rename board</DialogTitle>
-                        <DialogDescription>Choose a clear, recognizable name for this board.</DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-2 py-1">
-                        <Label htmlFor="board-name">Board name</Label>
-                        <Input
-                            id="board-name"
-                            value={newName}
-                            maxLength={100}
-                            disabled={updateBoardMutation.isPending}
-                            onChange={(event) => setNewName(event.target.value)}
-                            onKeyDown={(event) => event.key === "Enter" && handleUpdateBoardName()}
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" disabled={updateBoardMutation.isPending} onClick={() => setIsEditModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button disabled={!newName.trim() || updateBoardMutation.isPending} onClick={handleUpdateBoardName}>
-                            Save changes
-                        </Button>
-                    </DialogFooter>
+            <Dialog open={isEditModalOpen} onOpenChange={(open) => {
+                if (!open && updateBoardMutation.isPending) return;
+                setIsEditModalOpen(open);
+            }}>
+                <DialogContent className="sm:max-w-md" showCloseButton={!updateBoardMutation.isPending}>
+                    <form className="flex flex-col gap-5" onSubmit={(event) => {
+                        event.preventDefault();
+                        handleUpdateBoard();
+                    }}>
+                        <DialogHeader>
+                            <DialogTitle>Edit board</DialogTitle>
+                            <DialogDescription>Update how this board is named and identified in your workspace.</DialogDescription>
+                        </DialogHeader>
+
+                        <div className="board-surface flex h-24 items-end rounded-xl p-4 text-white shadow-sm" style={{ backgroundColor: newColor }}>
+                            <span className="truncate font-heading text-lg font-medium">{newName.trim() || "Untitled board"}</span>
+                        </div>
+
+                        <FieldGroup className="gap-4">
+                            <Field data-disabled={updateBoardMutation.isPending || undefined}>
+                                <FieldLabel htmlFor="edit-board-name">Board name</FieldLabel>
+                                <Input
+                                    required
+                                    autoFocus
+                                    id="edit-board-name"
+                                    value={newName}
+                                    maxLength={100}
+                                    autoComplete="off"
+                                    disabled={updateBoardMutation.isPending}
+                                    onChange={(event) => setNewName(event.target.value)}
+                                />
+                            </Field>
+                            <Field data-disabled={updateBoardMutation.isPending || undefined}>
+                                <FieldLabel htmlFor="edit-board-color">Board color</FieldLabel>
+                                <BoardColorPicker
+                                    value={newColor}
+                                    id="edit-board-color"
+                                    onChange={setNewColor}
+                                    disabled={updateBoardMutation.isPending}
+                                />
+                                <FieldDescription>{newColor.toUpperCase()} fills the board tile.</FieldDescription>
+                            </Field>
+                        </FieldGroup>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" disabled={updateBoardMutation.isPending} onClick={() => setIsEditModalOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={!newName.trim() || updateBoardMutation.isPending}>
+                                {updateBoardMutation.isPending && <Loader2 data-icon="inline-start" className="animate-spin"/>}
+                                Save changes
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
 

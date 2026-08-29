@@ -68,10 +68,10 @@ export function LabelSelectionView({ card, onStartCreate, onStartEdit, onDelete,
                                         </Label>
                                     </div>
                                     <div className="flex gap-0.5">
-                                        <Button size="icon-xs" variant="ghost" aria-label={`Edit ${label.name}`} onClick={() => onStartEdit(label)}>
+                                        <Button size="icon-sm" variant="ghost" aria-label={`Edit ${label.name}`} onClick={() => onStartEdit(label)}>
                                             <Edit2/>
                                         </Button>
-                                        <Button size="icon-xs" variant="ghost" disabled={isPending} aria-label={`Delete ${label.name}`} onClick={() => onDelete(label.id)}
+                                        <Button size="icon-sm" variant="ghost" disabled={isPending} aria-label={`Delete ${label.name}`} onClick={() => onDelete(label.id)}
                                                 className="text-destructive hover:text-destructive">
                                             <Trash2/>
                                         </Button>
